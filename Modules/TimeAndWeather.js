@@ -12,8 +12,7 @@ module.exports = function () {
         var maxCharsPerRow = 32;
         var weatherFeedUrl = 'http://www.weather.gov/xml/current_obs/KMSP.xml';
 
-        request(weatherFeedUrl, function(err, resp, body)
-        {
+        request(weatherFeedUrl, function(err, resp, body) {
             digester.digest(body, function(err, result) {
 
                 var options = {
