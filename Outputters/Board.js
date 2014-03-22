@@ -22,7 +22,7 @@ module.exports = function () {
       BOARD_PORT_BOTTOM = 27,
       BOARD_IP_MINI = "10.105.4.252",
       BOARD_PORT_MINI = 26,
-      MINI_SOoKET = new net.Socket('tcp4'),
+      MINI_SOCKET = new net.Socket('tcp4'),
       TOP_BOARD_SOCKET = new net.Socket('tcp4');
       BOTTOM_BOARD_SOCKET = new net.Socket('tcp4');
 
@@ -33,21 +33,33 @@ module.exports = function () {
           buffer = new Buffer(raw, 'hex');
       console.log(buffer);
         TOP_BOARD_SOCKET.write(buffer, 'ascii');
-//      for(var row = 0; row < 12; row++) {
-//        for (var col = 0; col < 32; col++ ) {
-//          console.log("Printing" + row + " " + col);
-//          var buffer = new Buffer(6);
-//          buffer.writeUInt8(0x01,0);
-//          buffer.writeUInt8(4+0x32,1);  // display + 32
-//          buffer.writeUInt8(row+0x20,2); // row
-//          buffer.writeUInt8(col+0x20,3); // col
-//          buffer.writeUInt8(0x88,4);
-//          buffer.writeUInt8(0x04,5);
-//          console.log(buffer);
-//          TOP_BOARD_SOCKET.write(buffer);
-//          sleep.sleep(1);
-//        }
-//      }
+       // for(var row = 0; row < 12; row++) {
+       //   for (var col = 0; col < 32; col++ ) {
+       //     console.log("Printing" + row + " " + col);
+       //     var buffer = new Buffer(6);
+       //     buffer.writeUInt8(0x01,0);
+       //     buffer.writeUInt8(4+0x32,1);  // display + 32
+       //     buffer.writeUInt8(row+0x20,2); // row
+       //     buffer.writeUInt8(col+0x20,3); // col
+       //     buffer.writeUInt8(0x88,4);
+       //     buffer.writeUInt8(0x04,5);
+       //     console.log(buffer);
+       //     TOP_BOARD_SOCKET.write(buffer);
+       //     sleep.sleep(1);
+       //   }
+       // }
+    });
+
+    TOP_BOARD_SOCKET.on('error', function(err) {
+      console.log('Error Connecting To Top Socket: ' + err);
+    });
+
+    BOTTOM_BOARD_SOCKET.on('error', function(err) {
+      console.log('Error Connecting To Bottom Socket: ' + err);
+    });
+
+    MINI_SOCKET.on('error', function(err) {
+      console.log('Error Connecting To Mini Socket: ' + err);
     });
 
     /**
