@@ -5,6 +5,7 @@ There are two routes to the API. They respond to any HTTP verb. All example quer
 	/peggy/write/
 	e.g. /peggy/write?board=1&x=0&y0&text=hello%20world
 ```
+To change the colors in the text add either {#0} for red {#1} for orange or {#2} for green. All subsequent characters will be that color. You can use multiple colors in the the text param. E.g. "{#1}Hello {#0}World{#2}!" will have "Hello" in red "World" in Orange and "!" in green.
 
 ```
 	/peggy/clear

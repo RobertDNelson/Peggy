@@ -56,7 +56,7 @@ module.exports = function () {
     function replaceColorPlaceholders(message) {
       message = message.replace('{#0}', String.fromCharCode(30), 'g');
       message = message.replace('{#1}', String.fromCharCode(31), 'g');
-      message = message.replace('{#2}', String.fromCharCode(32), 'g');
+      message = message.replace('{#2}', String.fromCharCode(29), 'g'); // we just remove green - adding in another char here would offset as it doesnt do anything
       return message;
     }
 
@@ -66,11 +66,9 @@ module.exports = function () {
      * @returns {Buffer} a data buffer for writing to the socket
      */
     function generateBuffer(message) {
-      console.log(message);
-
         var row = message.y;
         var col = message.x;
-        var text = message.text;
+        var text = replaceColorPlaceholders(message.text);
         var buffer = new Buffer(5+text.length);
         buffer.writeUInt8(0x01,0);
         buffer.writeUInt8(message.board+32,1);  // display + 32
