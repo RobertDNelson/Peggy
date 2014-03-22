@@ -16,13 +16,13 @@ module.exports = function () {
 
   // server is at .251
   Board = function () {
-    var BOARD_IP = 10.1.3.250,
+    var BOARD_IP = "10.105.4.250",
       BOARD_PORT = 25,
       BOARD_PORT_TOP = 26,
       BOARD_PORT_BOTTOM = 27,
-      BOARD_IP_MINI = 10.1.3.252,
+      BOARD_IP_MINI = "10.105.4.252",
       BOARD_PORT_MINI = 26,
-      MINI_SOCKET = new net.Socket('tcp4'),
+      MINI_SOoKET = new net.Socket('tcp4'),
       TOP_BOARD_SOCKET = new net.Socket('tcp4');
       BOTTOM_BOARD_SOCKET = new net.Socket('tcp4');
 
