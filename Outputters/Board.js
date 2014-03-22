@@ -28,35 +28,20 @@ module.exports = function () {
 
     TOP_BOARD_SOCKET.on('connect', function(){
       console.log("Top Board Connected");
-      //1, 35, 32, 32, 88, 4
-      var row = 5;
-      var col = 5;
-
-//      for(var row = 0; row < 12; row++) {
-//        for (var col = 0; col < 32; col++ ) {
-//         console.log("Printing" + row + " " + col);
-         var buffer = new Buffer(8);
-         buffer.writeUInt8(0x01,0);
-         buffer.writeUInt8(0+32,1);  // display + 32
-         buffer.writeUInt8(row+0x20,2); // row
-         buffer.writeUInt8(col+0x20,3); // col
-//         buffer.writeUInt8(0x88,4);
-        buffer.write("foo",4);
-        buffer.writeUInt8(0x04,7);
-        console.log(buffer);
-        if (TOP_BOARD_SOCKET.write(buffer)) {
-          console.log("the socket wrote correctly.");
-        } else {
-          console.log("the socket failt to write");
-        }
-//          TOP_BOARD_SOCKET.write(buffer);
-//          sleep.sleep(1);
-//        }
-//      }
+      setTimeout(writeTopBoard, 50);
+    });
+        
+    TOP_BOARD_SOCKET.on('error', function(err) {
+      console.log('Error Connecting To Top Socket: ' + err);
     });
 
-    TOP_BOARD_SOCKET.on('error', function() {
-      console.log("error!");
+    BOTTOM_BOARD_SOCKET.on('connect', function() {
+      console.log('Bottom Board Conencted');
+      setTimeout(writeBottomBoard, 50);
+    })
+
+    BOTTOM_BOARD_SOCKET.on('error', function(err) {
+      console.log('Error Connecting To Bottom Socket: ' + err);
     });
 
     /**
@@ -72,33 +57,75 @@ module.exports = function () {
       return message;
     }
 
-    MINI_SOCKET.connect(BOARD_PORT_MINI, BOARD_IP_MINI);
-    TOP_BOARD_SOCKET.connect(BOARD_PORT_TOP, BOARD_IP);
-    BOTTOM_BOARD_SOCKET.connect(BOARD_PORT_BOTTOM, BOARD_IP);
+    /**
+     * Generates a buffer to send to the socket from a given message object.
+     * @param {MessageRequest} message the object that should be written to the board
+     * @returns {Buffer} a data buffer for writing to the socket
+     */
+    function generateBuffer(message) {
+      console.log(message);
+
+        var row = message.y;
+        var col = message.x;
+        var text = message.text;
+        var buffer = new Buffer(5+text.length);
+        buffer.writeUInt8(0x01,0);
+        buffer.writeUInt8(message.board+32,1);  // display + 32
+        buffer.writeUInt8(row+0x20,2); // row
+        buffer.writeUInt8(col+0x20,3); // col
+        buffer.write(text,4);
+        buffer.writeUInt8(0x04,4+text.length);
+        return buffer;
+    }
+
+    var topBoardQueue = [],
+        bottomBoardQueue = [];
+
+    function writeTopBoard() {
+      var message = topBoardQueue.shift(),
+          buffer, success;
+      if (message) {
+        buffer = generateBuffer(message);
+        success = TOP_BOARD_SOCKET.write(buffer);
+        if (!success) {
+          console.log('Failed to write message: ' + message);
+        }
+      }
+      setTimeout(writeTopBoard, 50);
+    }
+
+    function writeBottomBoard() {
+      var message = bottomBoardQueue.shift(),
+          buffer, success;
+      if (message) {
+        buffer = generateBuffer(message);
+        success = BOTTOM_BOARD_SOCKET.write(buffer);
+        if (!success) {
+          console.log('Failed to write message: ' + message);
+        }
+      }
+      setTimeout(writeBottomBoard, 50);
+    }
+
+    function isTopBoardRequest(req) {
+      return ([0,1,4].indexOf(req.board) != -1);
+    }
 
     return {
-      miniSocket: MINI_SOCKET,
-      topBoardSocket: TOP_BOARD_SOCKET,
-      bottomBoardSocket: BOTTOM_BOARD_SOCKET,
-      generateBuffer: function(board, row, col, message) {
-        message = replaceColorPlaceholders(message);
-
-        var stringByteLength = Buffer.byteLength(message, 'ascii'),
-          bufferLength = stringByteLength + 4,
-          buffer = new Buffer(bufferLength),
-          packFormat = 'BBBB' + (stringByteLength - 1) + 'sB',
-          boardCode = board + 0x32,
-          rowCode = row + 0x20,
-          colCode = col + 0x20,
-          termCode = 0x04,
-          values = [0x01, boardCode, rowCode, colCode, message, termCode];
-
-        bufferpack.packTo(packFormat, buffer, 0, values);
-
-        return buffer;
+      connect: function() {
+        TOP_BOARD_SOCKET.connect(BOARD_PORT_TOP, BOARD_IP);
+        BOTTOM_BOARD_SOCKET.connect(BOARD_PORT_BOTTOM, BOARD_IP);
       },
-      connect: function() {},
-      writeLine: function (line) {
+      /**
+       * @param {MessageRequest} req
+       */
+      write: function (req) {
+        if (isTopBoardRequest(req)) {
+          topBoardQueue.push(req);
+        }
+        else {
+          bottomBoardQueue.push(req);
+        }
       }
     }
   }();
