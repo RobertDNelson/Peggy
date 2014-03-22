@@ -22,32 +22,41 @@ module.exports = function () {
       BOARD_PORT_BOTTOM = 27,
       BOARD_IP_MINI = "10.105.4.252",
       BOARD_PORT_MINI = 26,
-      MINI_SOoKET = new net.Socket('tcp4'),
+      MINI_SOCKET = new net.Socket('tcp4'),
       TOP_BOARD_SOCKET = new net.Socket('tcp4');
       BOTTOM_BOARD_SOCKET = new net.Socket('tcp4');
 
     TOP_BOARD_SOCKET.on('connect', function(){
       console.log("Top Board Connected");
       //1, 35, 32, 32, 88, 4
-       var raw = '013532328804';
-          buffer = new Buffer(raw, 'hex');
-      console.log(buffer);
-        TOP_BOARD_SOCKET.write(buffer, 'ascii');
+      var row = 5;
+      var col = 5;
+
 //      for(var row = 0; row < 12; row++) {
 //        for (var col = 0; col < 32; col++ ) {
-//          console.log("Printing" + row + " " + col);
-//          var buffer = new Buffer(6);
-//          buffer.writeUInt8(0x01,0);
-//          buffer.writeUInt8(4+0x32,1);  // display + 32
-//          buffer.writeUInt8(row+0x20,2); // row
-//          buffer.writeUInt8(col+0x20,3); // col
-//          buffer.writeUInt8(0x88,4);
-//          buffer.writeUInt8(0x04,5);
-//          console.log(buffer);
+//         console.log("Printing" + row + " " + col);
+         var buffer = new Buffer(8);
+         buffer.writeUInt8(0x01,0);
+         buffer.writeUInt8(0+32,1);  // display + 32
+         buffer.writeUInt8(row+0x20,2); // row
+         buffer.writeUInt8(col+0x20,3); // col
+//         buffer.writeUInt8(0x88,4);
+        buffer.write("foo",4);
+        buffer.writeUInt8(0x04,7);
+        console.log(buffer);
+        if (TOP_BOARD_SOCKET.write(buffer)) {
+          console.log("the socket wrote correctly.");
+        } else {
+          console.log("the socket failt to write");
+        }
 //          TOP_BOARD_SOCKET.write(buffer);
 //          sleep.sleep(1);
 //        }
 //      }
+    });
+
+    TOP_BOARD_SOCKET.on('error', function() {
+      console.log("error!");
     });
 
     /**
