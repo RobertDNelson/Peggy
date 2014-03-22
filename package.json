@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "dependencies" : {
     "bufferpack" : "*",
-    "express" : "3.x"
+    "express" : "3.x",
+    "request" : "2.x",
+    "xml-digester" : "*",
+    "date-format-lite" : "0.5.x"
   }
 }
