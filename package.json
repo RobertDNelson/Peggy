@@ -1,0 +1,7 @@
+{
+  "name": "CoCo_Minneapolis_LiteBright",
+  "version": "0.0.1",
+  "dependencies" : {
+    "bufferpack" : "*"
+  }
+}
