@@ -1,20 +1,11 @@
 var net = require('net');
 var bufferpack = require('bufferpack');
 var sleep = require('sleep');
+var MessageRequest = require('../models/message_request.js');
 
 module.exports = function () {
   var Board;
 
-  //https://github.com/ryanrolds/bufferpack
-
-  /*
-   * BOARDS
-   *
-   *  0 1 4
-   *  2 3 5
-   */
-
-  // server is at .251
   Board = function () {
     var BOARD_IP = "10.105.4.250",
       BOARD_PORT = 25,
@@ -24,7 +15,19 @@ module.exports = function () {
       BOARD_PORT_MINI = 26,
       MINI_SOCKET = new net.Socket('tcp4'),
       TOP_BOARD_SOCKET = new net.Socket('tcp4');
-      BOTTOM_BOARD_SOCKET = new net.Socket('tcp4');
+      BOTTOM_BOARD_SOCKET = new net.Socket('tcp4'),
+      BOARDS = {
+        '0': { 'cols': 80, 'rows': 12, 'right': 1, 'below': 2, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
+        '1': { 'cols': 80, 'rows': 12, 'right': 4, 'below': 3, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
+        '4': { 'cols': 32, 'rows': 12, 'right': -1, 'below': 5, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
+
+        '2': { 'cols': 80, 'rows': 12, 'right': 3, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
+        '3': { 'cols': 80, 'rows': 12, 'right': 5, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
+        '5': { 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
+
+        '6': { 'cols': 80, 'rows': 10, 'right': -1, 'below': -1, 'port': BOARD_PORT_MINI, 'ip': BOARD_IP_MINI },
+
+      };
 
     TOP_BOARD_SOCKET.on('connect', function(){
       console.log("Top Board Connected");
@@ -111,6 +114,26 @@ module.exports = function () {
       return ([0,1,4].indexOf(req.board) != -1);
     }
 
+  /*
+   * BOARDS
+   *
+   *  0 1 4
+   *  2 3 5
+   */
+   /*display_widths = {
+    '0': { 'cols': 80, 'rows': 12, 'right': 1, 'below': 2, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
+    '1': { 'cols': 80, 'rows': 12, 'right': 4, 'below': 3, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
+    '4': { 'cols': 32, 'rows': 12, 'right': -1, 'below': 5, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
+
+    '2': { 'cols': 80, 'rows': 12, 'right': 3, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
+    '3': { 'cols': 80, 'rows': 12, 'right': 5, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
+    '5': { 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
+
+    '6': { 'cols': 80, 'rows': 10, 'right': -1, 'below': -1, 'port': BOARD_PORT_MINI, 'ip': BOARD_IP_MINI },
+
+}
+*/
+
     return {
       connect: function() {
         TOP_BOARD_SOCKET.connect(BOARD_PORT_TOP, BOARD_IP);
@@ -126,6 +149,17 @@ module.exports = function () {
         else {
           bottomBoardQueue.push(req);
         }
+      },
+      clear: function(boardNumber) {
+        var board = BOARDS[boardNumber.toString()];
+        var message = "";
+        for (var i = board.cols - 1; i >= 0; i--) {
+            message += " ";
+        };
+        for (var row = board.rows - 1; row >= 0; row--) {
+          var req = new MessageRequest(boardNumber, 0, row, message);
+          this.write(req);
+        };
       }
     }
   }();

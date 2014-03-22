@@ -2,6 +2,7 @@ var request = require('request');
 var http = require('http');
 var xml_digester = require("xml-digester");
 var digester = xml_digester.XmlDigester({});
+require("date-format-lite");
 
 module.exports = function () {
     var TimeAndWeather = {};
@@ -18,7 +19,19 @@ module.exports = function () {
                 var options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?x=1&y=1&text=' + encodeURIComponent(result.current_observation.weather)
+                    path: '/peggy/write?board=4&x=1&y=0&text=' + encodeURIComponent(new Date().format('DDDD, MMMM D H:mm A'))
+                };
+
+                http.get(options, function(res) {
+                        console.log("Got response: " + res.statusCode);
+                    }).on('error', function(e) {
+                        console.log("Got error: " + e.message);
+                    });
+
+                var options = {
+                    host: 'localhost',
+                    port: 8080,
+                    path: '/peggy/write?board=4&x=3&y=1&text=' + encodeURIComponent(result.current_observation.weather)
                 };
 
                 http.get(options, function(res) {
@@ -30,7 +43,7 @@ module.exports = function () {
                 options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?x=1&y=1&text=' + encodeURIComponent('Temperature: ' + result.current_observation.temperature_string)
+                    path: '/peggy/write?board=4&x=3&y=2&text=' + encodeURIComponent('Temperature: ' + result.current_observation.temperature_string)
                 }
 
                 http.get(options, function(res) {
@@ -42,7 +55,7 @@ module.exports = function () {
                 options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?x=1&y=1&text=' + encodeURIComponent('Wind: ' + result.current_observation.wind_string)
+                    path: '/peggy/write?board=4&x=3&y=3&text=' + encodeURIComponent('Wind: ' + result.current_observation.wind_string)
                 };
 
                 http.get(options, function(res) {

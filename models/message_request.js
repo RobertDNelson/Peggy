@@ -1,8 +1,9 @@
 module.exports = function MessageRequest(board, x, y, text) {
+
 	return {
-		board : board,
-		x : x, 
-		y : y, 
-		text : text
+		board : parseInt(board, 10),
+		x : parseInt(x, 10), 
+		y : parseInt(y, 10), 
+		text : text.toString()
 	};
 }
