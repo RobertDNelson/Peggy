@@ -1,3 +1,5 @@
 var Board = require('./Outputters/Board.js');
+var TimeAndWeather = require('./Modules/TimeAndWeather.js');
 
-Board.connect();
+//Board.connect();
+TimeAndWeather.execute();
