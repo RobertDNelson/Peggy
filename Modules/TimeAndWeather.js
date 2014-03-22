@@ -65,6 +65,8 @@ module.exports = function () {
                     });
             });
         });
+
+        setTimeout(this.execute, 60 * 1000);
     }
 
     return TimeAndWeather;
