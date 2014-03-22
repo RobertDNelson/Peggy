@@ -25,8 +25,14 @@ api.all('/peggy/write', function (req, res) {
 });
 
 api.all('/peggy/clear', function(req, res) {
+	if (!req.query.board || !req.query.board > 5) {
+		res.send(500, {error:'invalid request'});
+		return;
+	}
+
 	var boardNumber = parseInt(req.query.board);
 	board.clear(boardNumber);
+	res.send(200);
 });
 
 api.listen(8080);
