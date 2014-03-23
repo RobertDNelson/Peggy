@@ -14,9 +14,8 @@ To change the colors in the text add either {#0} for red {#1} for orange or {#2}
 
 Modules 
 ---------------
-Any .js files in the modules subdirectory will be executed automatically by calling their execute function. Each module is responsible for keeping itself running by calling setTimeout or another method.
+Any .js files in the modules subdirectory will be forked and executed immediately. Scripts there are responsible for keeping themselves alive.
 
-Boards
 ----------------
 Boards are in the following order 
 ```
