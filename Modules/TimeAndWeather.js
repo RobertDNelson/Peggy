@@ -8,24 +8,23 @@ module.exports = function () {
     var TimeAndWeather = {};
 
     TimeAndWeather.execute = function() {
+        setInterval(TimeAndWeather.execute, 60000);
 
         var maxCharsPerRow = 32;
         var weatherFeedUrl = 'http://www.weather.gov/xml/current_obs/KMSP.xml';
+        var options = {
+                host: 'localhost',
+                port: 8080,
+                path: '/peggy/write?board=4&x=1&y=0&text=' + encodeURIComponent(new Date().format('DDDD, MMMM D H:mm A'))
+            };
+
+        http.get(options, function(res) {
+            }).on('error', function(e) {
+                console.log("Got error: " + e.message);
+            });
 
         request(weatherFeedUrl, function(err, resp, body) {
             digester.digest(body, function(err, result) {
-
-                var options = {
-                    host: 'localhost',
-                    port: 8080,
-                    path: '/peggy/write?board=4&x=1&y=0&text=' + encodeURIComponent(new Date().format('DDDD, MMMM D H:mm A'))
-                };
-
-                http.get(options, function(res) {
-                        console.log("Got response: " + res.statusCode);
-                    }).on('error', function(e) {
-                        console.log("Got error: " + e.message);
-                    });
 
                 var options = {
                     host: 'localhost',
@@ -34,7 +33,7 @@ module.exports = function () {
                 };
 
                 http.get(options, function(res) {
-                        console.log("Got response: " + res.statusCode);
+
                     }).on('error', function(e) {
                         console.log("Got error: " + e.message);
                     });
@@ -46,7 +45,6 @@ module.exports = function () {
                 }
 
                 http.get(options, function(res) {
-                        console.log("Got response: " + res.statusCode);
                     }).on('error', function(e) {
                         console.log("Got error: " + e.message);
                     });
@@ -58,14 +56,11 @@ module.exports = function () {
                 };
 
                 http.get(options, function(res) {
-                        console.log("Got response: " + res.statusCode);
                     }).on('error', function(e) {
                         console.log("Got error: " + e.message);
                     });
             });
         });
-
-        setTimeout(this.execute, 60 * 1000);
     }
 
     return TimeAndWeather;
