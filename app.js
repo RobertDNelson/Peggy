@@ -40,7 +40,7 @@ api.all('/peggy/clear', function(req, res) {
 api.listen(8080);
 
 // Launch any modules
-fs.readdir('./modules', function(err, files) {
+fs.readdir('./Modules', function(err, files) {
 	files.forEach(function(file) {
 		if (file.match(/\.js$/)) {
 			var mod = require('./modules/'+file);
