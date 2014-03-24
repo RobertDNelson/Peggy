@@ -43,7 +43,7 @@ api.listen(8080);
 fs.readdir('./Modules', function(err, files) {
 	files.forEach(function(file) {
 		if (file.match(/\.js$/)) {
-			var mod = require('./modules/'+file);
+			var mod = require('./Modules/'+file);
 			exec('node '+mod);
 		}
 	});
