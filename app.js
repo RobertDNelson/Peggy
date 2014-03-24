@@ -1,5 +1,5 @@
 var fs = require('fs');
-var board = require('./Outputters/board.js');
+var board = require('./Outputters/Board.js');
 var MessageRequest = require('./models/message_request.js');
 var express = require('express');
 var api = express();
