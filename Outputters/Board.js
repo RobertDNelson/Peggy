@@ -54,9 +54,9 @@ module.exports = function () {
      * @returns {String} The properly formated string
      */
     function replaceColorPlaceholders(message) {
-      message = message.replace('{g}', String.fromCharCode(29), 'g'); // Green
-      message = message.replace('{r}', String.fromCharCode(30), 'g'); // Red
-      message = message.replace('{o}', String.fromCharCode(31), 'g'); // Orange
+      message = message.replace(/\{g\}/g, String.fromCharCode(29)); // Green
+      message = message.replace(/\{r\}/g, String.fromCharCode(30)); // Red
+      message = message.replace(/\{o\}/g, String.fromCharCode(31)); // Orange
       return message;
     }
 
