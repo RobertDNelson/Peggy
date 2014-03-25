@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "dependencies" : {
     "bufferpack" : "*",
-    "sleep" : "*",
     "express" : "3.x",
     "request" : "2.x",
     "xml-digester" : "*",
