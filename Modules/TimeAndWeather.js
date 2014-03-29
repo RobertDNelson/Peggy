@@ -10,7 +10,7 @@ function update() {
         var options = {
                 host: 'localhost',
                 port: 8080,
-                path: '/peggy/write?board=4&x=1&y=0&text=' + encodeURIComponent(new Date().format('DDDD, MMMM D H:mm A')),
+                path: '/peggy/write?board=4&x=1&y=0&text=' + encodeURIComponent(new Date().format('DDDD, MMMM D H:mm A') + "                    "),
                 agent: false
             };
 
@@ -25,7 +25,7 @@ function update() {
                 var options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=4&x=3&y=1&text=' + encodeURIComponent(result.current_observation.weather),
+                    path: '/peggy/write?board=4&x=3&y=1&text=' + encodeURIComponent(result.current_observation.weather + "                    "),
                     agent: false
                 };
 
@@ -38,7 +38,7 @@ function update() {
                 options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=4&x=3&y=2&text=' + encodeURIComponent('Temperature: ' + result.current_observation.temperature_string),
+                    path: '/peggy/write?board=4&x=3&y=2&text=' + encodeURIComponent('Temperature: ' + result.current_observation.temperature_string + "                    "),
                     agent: false
                 }
 
@@ -50,7 +50,7 @@ function update() {
                 options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=4&x=3&y=3&text=' + encodeURIComponent('Wind: ' + result.current_observation.wind_string), 
+                    path: '/peggy/write?board=4&x=3&y=3&text=' + encodeURIComponent('Wind: ' + result.current_observation.wind_string + "                    "),
                     agent: false
                 };
 
