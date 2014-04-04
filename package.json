@@ -8,6 +8,8 @@
     "xml-digester" : "*",
     "date-format-lite" : "0.5.x",
     "sleep" : "1.1.x",
-    "twitter" : "*"
+    "twitter" : "*",
+    "html-encoder-decoder" : "*",
+    "ical" : "*"
   }
 }
