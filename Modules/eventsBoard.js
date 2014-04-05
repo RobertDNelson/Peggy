@@ -8,7 +8,7 @@ var HTMLDecoderEncoder = require("html-encoder-decoder"), encoded = null;
 var ical = require('ical');
 
 function update() {
-        var url = "http://www.google.com/calendar/ical/events@cocomsp.com/public/basic.ics";
+        var url = "http://www.google.com/calendar/ical/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/basic.ics";
 
         ical.fromURL(url, {}, function(err, data) {
             var array = [];
