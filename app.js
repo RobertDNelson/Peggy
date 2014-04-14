@@ -4,6 +4,7 @@ var MessageRequest = require('./models/message_request.js');
 var express = require('express');
 var api = express();
 var exec = require('child_process').exec;
+var twitter = require('./Modules/twitterBoard.js');
 
 board.connect();
 
@@ -33,6 +34,17 @@ api.all('/peggy/clear', function(req, res) {
 
 	var boardNumber = parseInt(req.query.board);
 	board.clear(boardNumber);
+	res.send(200);
+	res.end();
+});
+
+api.all('/peggy/twitter', function(req, res) {
+	if (!req.query.q) {
+		res.send(500, {error:'invalid request'});
+		return;
+	}
+	board.clear(2);
+	twitter.searchTerm = req.query.q;
 	res.send(200);
 	res.end();
 });

@@ -37,7 +37,7 @@ function update() {
                 rows[i + 1] = array[i].start.format("M/D/YY H:mm A") + " - " + array[i].summary;
             }
 
-            for (var i = 0; i < 11; i++) {
+            for (var i = 0; i < 12; i++) {
 
                 var options = {
                     host: "localhost",
