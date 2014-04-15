@@ -33,7 +33,7 @@ module.exports = function () {
       console.log("Top Board Connected");
       setTimeout(writeTopBoard, 50);
     });
-        
+
     TOP_BOARD_SOCKET.on('error', function(err) {
       console.log('Error Connecting To Top Socket: ' + err);
     });
@@ -61,6 +61,25 @@ module.exports = function () {
     }
 
     /**
+     * Replaces the characters with escaped characters.
+     * @param message
+     * @returns {String} The escaped string
+     */
+    function escapeCharacters(message) {
+      message = message.replace('\[', '\(');
+      message = message.replace('\\\\', '\/');
+      message = message.replace('\]', '\)');
+      message = message.replace('\^', '-');
+      message = message.replace('_', '-');
+      message = message.replace('`', '\'');
+      message = message.replace('{', '\(');
+      message = message.replace('\|', '1');
+      message = message.replace('}', '\)');
+      message = message.replace('~', '-');
+      return message;
+    }
+
+    /**
      * Generates a buffer to send to the socket from a given message object.
      * @param {MessageRequest} message the object that should be written to the board
      * @returns {Buffer} a data buffer for writing to the socket
@@ -68,7 +87,7 @@ module.exports = function () {
     function generateBuffer(message) {
         var row = message.y;
         var col = message.x;
-        var text = replaceColorPlaceholders(message.text);
+        var text = escapeCharacters(replaceColorPlaceholders(message.text));
         var buffer = new Buffer(5+text.length);
         buffer.writeUInt8(0x01,0);
         buffer.writeUInt8(message.board+32,1);  // display + 32
@@ -164,4 +183,3 @@ module.exports = function () {
 
   return Board;
 }();
-
