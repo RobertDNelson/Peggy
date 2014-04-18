@@ -52,6 +52,12 @@ api.all('/peggy/on', function(req, res) {
 	res.end();
 });
 
+api.all('/peggy/powerStatus', function(req, res) {
+	res.json({ powerOn: board.isOn() });
+	res.send(200);
+	res.end();
+});
+
 api.all('/peggy/twitter', function(req, res) {
 	if (!req.query.q) {
 		res.send(500, {error:'invalid request'});

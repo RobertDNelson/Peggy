@@ -198,6 +198,9 @@ module.exports = function () {
           this.clear(i);
         }
         allowWrites = false;
+      },
+      isOn: function() {
+        return allowWrites;
       }
     }
   }();
