@@ -170,8 +170,6 @@ module.exports = function () {
           else {
             bottomBoardQueue.push(req);
           }
-        } else {
-          console.log(new Date() +  "We prevented a write because the board is off.");
         }
       },
       clear: function(boardNumber) {
