@@ -3,8 +3,9 @@ var board = require('./Outputters/Board.js');
 var MessageRequest = require('./models/message_request.js');
 var express = require('express');
 var api = express();
-var exec = require('child_process').exec;
-var twitter = require('./Modules/twitterBoard.js');
+var fork = require('child_process').fork;
+var modules = {};
+var util = require('util');
 
 board.connect();
 
@@ -38,13 +39,30 @@ api.all('/peggy/clear', function(req, res) {
 	res.end();
 });
 
+api.all('/peggy/off', function(req, res) {
+	board.turnOff();
+	res.send(200);
+	res.end();
+});
+
+api.all('/peggy/on', function(req, res) {
+	// reset the board
+	board.turnOn();
+	res.send(200);
+	res.end();
+});
+
 api.all('/peggy/twitter', function(req, res) {
 	if (!req.query.q) {
 		res.send(500, {error:'invalid request'});
 		return;
 	}
 	board.clear(2);
-	twitter.searchTerm = req.query.q;
+//	modules['twitterBoard.js'].searchTerm = req.query.q;
+	modules['twitterBoard.js'].searchTerm = req.query.q;
+	console.log("twitterBoard == " + util.inspect(modules['twitterBoard.js']));
+//	modeuls['twitterBoard.js'].update();
+//	modules['twitterBoard.js'].send('update');
 	res.send(200);
 	res.end();
 });
@@ -53,10 +71,9 @@ api.listen(8080);
 
 // Launch any modules
 fs.readdir('./Modules', function(err, files) {
-	files.forEach(function(file) {
+	files.forEach(function(file, index, array) {
 		if (file.match(/\.js$/)) {
-			var mod = require('./Modules/'+file);
-			exec('node '+mod);
+			modules[file] = fork('./Modules/' + file);
 		}
 	});
 });

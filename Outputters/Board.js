@@ -29,6 +29,9 @@ module.exports = function () {
 
       };
 
+    var allowWrites = true;
+
+
     TOP_BOARD_SOCKET.on('connect', function(){
       console.log("Top Board Connected");
       setTimeout(writeTopBoard, 50);
@@ -160,11 +163,15 @@ module.exports = function () {
        * @param {MessageRequest} req
        */
       write: function (req) {
-        if (isTopBoardRequest(req)) {
-          topBoardQueue.push(req);
-        }
-        else {
-          bottomBoardQueue.push(req);
+        if (allowWrites) { // 7:52
+          if (isTopBoardRequest(req)) {
+            topBoardQueue.push(req);
+          }
+          else {
+            bottomBoardQueue.push(req);
+          }
+        } else {
+          console.log(new Date() +  "We prevented a write because the board is off.");
         }
       },
       clear: function(boardNumber) {
@@ -177,6 +184,22 @@ module.exports = function () {
           var req = new MessageRequest(boardNumber, 0, row, message);
           this.write(req);
         };
+      },
+      turnOn: function() {
+        topBoardQueue = [];
+        bottomBoardQueue = [];
+        for (var i = 5; i >= 0; i--) {
+          this.clear(i);
+        }
+        allowWrites = true;
+      },
+      turnOff: function() {
+        topBoardQueue = [];
+        bottomBoardQueue = [];
+        for (var i = 5; i >= 0; i--) {
+          this.clear(i);
+        }
+        allowWrites = false;
       }
     }
   }();
