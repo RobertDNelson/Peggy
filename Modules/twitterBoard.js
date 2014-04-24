@@ -8,8 +8,6 @@ var twit = new twitter({
 });
 var http = require('http');
 
-var searchTerm = "@CoCoMSP";
-
 function colorlessLength(s) {
   return s.replace(/\{.{1}\}/g, "").length;
 }
@@ -19,6 +17,8 @@ function colorLength(s) {
 }
 
 function update() {
+
+  var searchTerm = process.env['twitterSearchTerm'] || "@CoCoMSP";
 
   twit.search(searchTerm, function(data) {
     var curRowNum = 1;
@@ -83,6 +83,13 @@ function update() {
         });
     }
   });
+
+  return {
+    message: function(obj) {
+      console.log("message called. obj == " + obj);
+      update();
+    }
+  }
 }
 
 update();

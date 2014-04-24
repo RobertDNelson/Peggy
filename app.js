@@ -52,8 +52,8 @@ api.all('/peggy/on', function(req, res) {
 	res.end();
 });
 
-api.all('/peggy/powerStatus', function(req, res) {
-	res.json({ powerOn: board.isOn() });
+api.all('/peggy/status', function(req, res) {
+	res.json({ powerOn: board.isOn(), date: Date.now() });
 	res.send(200);
 	res.end();
 });
@@ -63,12 +63,10 @@ api.all('/peggy/twitter', function(req, res) {
 		res.send(500, {error:'invalid request'});
 		return;
 	}
+	modules['twitterBoard.js'].kill;
 	board.clear(2);
-//	modules['twitterBoard.js'].searchTerm = req.query.q;
-	modules['twitterBoard.js'].searchTerm = req.query.q;
-	console.log("twitterBoard == " + util.inspect(modules['twitterBoard.js']));
-//	modeuls['twitterBoard.js'].update();
-//	modules['twitterBoard.js'].send('update');
+	process.env['twitterSearchTerm'] = req.query.q;
+	modules['twitterBoard.js'] = fork('./Modules/twitterBoard.js');
 	res.send(200);
 	res.end();
 });
@@ -79,7 +77,7 @@ api.listen(8080);
 fs.readdir('./Modules', function(err, files) {
 	files.forEach(function(file, index, array) {
 		if (file.match(/\.js$/)) {
-			modules[file] = fork('./Modules/' + file);
+			modules[file] = fork('./Modules/' + file, []);
 		}
 	});
 });
