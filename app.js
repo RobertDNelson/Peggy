@@ -63,10 +63,8 @@ api.all('/peggy/twitter', function(req, res) {
 		res.send(500, {error:'invalid request'});
 		return;
 	}
-	modules['twitterBoard.js'].kill;
+	modules['twitterBoard.js'].send({ term: req.query.q });
 	board.clear(2);
-	process.env['twitterSearchTerm'] = req.query.q;
-	modules['twitterBoard.js'] = fork('./Modules/twitterBoard.js');
 	res.send(200);
 	res.end();
 });
