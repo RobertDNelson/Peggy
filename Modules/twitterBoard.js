@@ -16,6 +16,10 @@ function colorLength(s) {
   return s.length - colorlessLength(s);
 }
 
+process.on('message', function(search) {
+  process.env['twitterSearchTerm'] = search['term'];
+});
+
 function update() {
 
   var searchTerm = process.env['twitterSearchTerm'] || "@CoCoMSP";
