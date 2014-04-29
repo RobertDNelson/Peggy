@@ -69,15 +69,15 @@ module.exports = function () {
      * @returns {String} The escaped string
      */
     function escapeCharacters(message) {
-      message = message.replace('\[', '\(');
-      message = message.replace('\\\\', '\/');
-      message = message.replace('\]', '\)');
-      message = message.replace('\^', '-');
+      message = message.replace('[', '(');
+      message = message.replace('\', '/');
+      message = message.replace(']', ')');
+      message = message.replace('^', '-');
       message = message.replace('_', '-');
-      message = message.replace('`', '\'');
-      message = message.replace('{', '\(');
-      message = message.replace('\|', '1');
-      message = message.replace('}', '\)');
+      message = message.replace('`', ''');
+      message = message.replace('{', '(');
+      message = message.replace('|', '1');
+      message = message.replace('}', ')');
       message = message.replace('~', '-');
       return message;
     }
