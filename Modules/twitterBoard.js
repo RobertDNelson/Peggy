@@ -18,6 +18,7 @@ function colorLength(s) {
 
 process.on('message', function(search) {
   process.env['twitterSearchTerm'] = search['term'];
+  update();
 });
 
 function update() {
