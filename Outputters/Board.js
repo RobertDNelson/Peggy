@@ -69,16 +69,16 @@ module.exports = function () {
      * @returns {String} The escaped string
      */
     function escapeCharacters(message) {
-      message = message.replace('[', '(');
-      message = message.replace('\', '/');
-      message = message.replace(']', ')');
-      message = message.replace('^', '-');
-      message = message.replace('_', '-');
-      message = message.replace('`', ''');
-      message = message.replace('{', '(');
-      message = message.replace('|', '1');
-      message = message.replace('}', ')');
-      message = message.replace('~', '-');
+      message = message.replace(/\[/g, '(');
+      message = message.replace(/\//g, '/');
+      message = message.replace(/\]/g, ')');
+      message = message.replace(/\^/g, '-');
+      message = message.replace(/_/g, '\-');
+      message = message.replace(/`/g, '\'');
+      message = message.replace(/\{/g, '(');
+      message = message.replace(/\|/g, '1');
+      message = message.replace(/\}/g, ')');
+      message = message.replace(/~/g, '-');
       return message;
     }
 
