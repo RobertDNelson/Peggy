@@ -79,6 +79,7 @@ module.exports = function () {
       message = message.replace(/\|/g, '1');
       message = message.replace(/\}/g, ')');
       message = message.replace(/~/g, '-');
+      message = message.replace(/–/g, '-');
       return message;
     }
 
