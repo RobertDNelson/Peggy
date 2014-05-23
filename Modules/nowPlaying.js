@@ -14,7 +14,7 @@ function update() {
                 var options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent("{g}Now Playing: " + result.rss.channel.item[0].title + "                "),
+                    path: '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent("{g}Now Playing: " + result.rss.channel.item[0].title + "                                                              "),
                     agent: false
                 };
 
@@ -27,7 +27,7 @@ function update() {
                 options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=10&text=' + encodeURIComponent("{o}Last Played: " + result.rss.channel.item[1].title + "                "),
+                    path: '/peggy/write?board=1&x=1&y=10&text=' + encodeURIComponent("{o}Last Played: " + result.rss.channel.item[1].title + "                                                              "),
                     agent: false
                 };
 
@@ -40,7 +40,7 @@ function update() {
                 options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=11&text=' + encodeURIComponent("{r}Double Prev: " + result.rss.channel.item[2].title + "                "),
+                    path: '/peggy/write?board=1&x=1&y=11&text=' + encodeURIComponent("{r}Double Prev: " + result.rss.channel.item[2].title + "                                                              "),
                     agent: false
                 };
 
