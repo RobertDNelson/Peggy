@@ -53,9 +53,8 @@ api.all('/peggy/on', function(req, res) {
 });
 
 api.all('/peggy/status', function(req, res) {
-	res.json({ powerOn: board.isOn(), date: Date.now() });
 	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.send(200);
+	res.json(200, { powerOn: board.isOn(), date: Date.now() });
 	res.end();
 });
 
