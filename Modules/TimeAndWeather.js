@@ -63,4 +63,4 @@ function update() {
 }
 
 update();
-setInterval(update, 60000);
+setInterval(update, 1 * 60 * 1000);

@@ -26,7 +26,6 @@ module.exports = function () {
         '5': { 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
 
         '6': { 'cols': 80, 'rows': 10, 'right': -1, 'below': -1, 'port': BOARD_PORT_MINI, 'ip': BOARD_IP_MINI },
-
       };
 
     var allowWrites = true;
@@ -135,26 +134,6 @@ module.exports = function () {
       return ([0,1,4].indexOf(req.board) != -1);
     }
 
-  /*
-   * BOARDS
-   *
-   *  0 1 4
-   *  2 3 5
-   */
-   /*display_widths = {
-    '0': { 'cols': 80, 'rows': 12, 'right': 1, 'below': 2, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
-    '1': { 'cols': 80, 'rows': 12, 'right': 4, 'below': 3, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
-    '4': { 'cols': 32, 'rows': 12, 'right': -1, 'below': 5, 'port': BOARD_PORT_TOP, 'ip': BOARD_IP },
-
-    '2': { 'cols': 80, 'rows': 12, 'right': 3, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
-    '3': { 'cols': 80, 'rows': 12, 'right': 5, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
-    '5': { 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'port': BOARD_PORT_BOTTOM, 'ip': BOARD_IP },
-
-    '6': { 'cols': 80, 'rows': 10, 'right': -1, 'below': -1, 'port': BOARD_PORT_MINI, 'ip': BOARD_IP_MINI },
-
-}
-*/
-
     return {
       connect: function() {
         TOP_BOARD_SOCKET.connect(BOARD_PORT_TOP, BOARD_IP);
@@ -164,7 +143,7 @@ module.exports = function () {
        * @param {MessageRequest} req
        */
       write: function (req) {
-        if (allowWrites) { // 7:52
+        if (allowWrites) {
           if (isTopBoardRequest(req)) {
             topBoardQueue.push(req);
           }

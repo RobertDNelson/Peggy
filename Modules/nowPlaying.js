@@ -6,7 +6,7 @@ require("date-format-lite");
 
 function update() {
         var maxCharsPerRow = 32;
-        var nowPlayingFeedUrl = 'http://ws.audioscrobbler.com/1.0/user/CoCoDT/recenttracks.rss';
+        var nowPlayingFeedUrl = 'http://ws.audioscrobbler.com/1.0/user/CoCoDT/recenttracks.rss?limit=3';
 
         request(nowPlayingFeedUrl, function(err, resp, body) {
             digester.digest(body, function(err, result) {
@@ -14,12 +14,11 @@ function update() {
                 var options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent("{g}Now Playing: " + result.rss.channel.item[0].title + "                                                              "),
+                    path: '/peggy/write?board=1&x=0&y=9&text=' + encodeURIComponent("{g}Now Playing: " + result.rss.channel.item[0].title + "                                                              "),
                     agent: false
                 };
 
                 http.get(options, function(res) {
-
                     }).on('error', function(e) {
                         console.log("Got error: " + e.message);
                     });
@@ -27,12 +26,11 @@ function update() {
                 options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=10&text=' + encodeURIComponent("{o}Last Played: " + result.rss.channel.item[1].title + "                                                              "),
+                    path: '/peggy/write?board=1&x=0&y=10&text=' + encodeURIComponent("{o}Last Played: " + result.rss.channel.item[1].title + "                                                              "),
                     agent: false
                 };
 
                 http.get(options, function(res) {
-
                     }).on('error', function(e) {
                         console.log("Got error: " + e.message);
                     });
@@ -40,12 +38,11 @@ function update() {
                 options = {
                     host: 'localhost',
                     port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=11&text=' + encodeURIComponent("{r}Double Prev: " + result.rss.channel.item[2].title + "                                                              "),
+                    path: '/peggy/write?board=1&x=0&y=11&text=' + encodeURIComponent("{r}Double Prev: " + result.rss.channel.item[2].title + "                                                              "),
                     agent: false
                 };
 
                 http.get(options, function(res) {
-
                     }).on('error', function(e) {
                         console.log("Got error: " + e.message);
                     });

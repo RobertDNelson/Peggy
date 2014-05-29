@@ -53,8 +53,7 @@ function update() {
           // This tweet will fit nicely into this row
           thisRow += curColorCode + thisTweet.substring(0, maxCharsPerRow - colorlessLength(thisRow)) + " ";
           break;
-        }
-        else {
+        } else {
           // We'll have to break this tweet into two rows
 
           // First, we'll append what we can and put the current row into the array
