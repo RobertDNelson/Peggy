@@ -69,6 +69,17 @@ api.all('/peggy/twitter', function(req, res) {
 	res.end();
 });
 
+api.all('/peggy/fifaScores', function(req, res) {
+	if (!req.query.q) {
+		res.send(500, {error:'invalid request'});
+		return;
+	}
+	modules['fifaScores.js'].send({ term: req.query.q });
+	board.clear(0);
+	res.send(200);
+	res.end();
+});
+
 api.listen(8080);
 
 // Launch any modules
