@@ -32,45 +32,82 @@ function update() {
         //24 @ Arena Pernambuco - Italy: 0, Costa Rica: 0{g} @ 11:00
         //25 @ Arena Fonte Nova - Switzerland: 0, France: 0{g} @ 2:00
         //26 @ Arena da Baixada - Honduras: 0, Ecuador: 0{g} @ 5:00
-        var matches = JSON.parse(body);
+        if (!err && resp.statusCode == 200) {
+            try {
 
-        for (var i = 0; i < matches.length; i++) {
-            var match = matches[i];
+                var matches = JSON.parse(body);
 
-            var homeColor = "";
-            var awayColor = "";
+                for (var i = 0; i < matches.length; i++) {
+                    var match = matches[i];
 
-            if (match.home_team.goals > match.away_team.goals) {
-                homeColor = "{o}";
-                awayColor = "{r}";
+                    var homeColor = "";
+                    var awayColor = "";
+
+                    if (match.home_team.goals > match.away_team.goals) {
+                        homeColor = "{o}";
+                        awayColor = "{r}";
+                    }
+                    else if (match.home_team.goals < match.away_team.goals) {
+                        homeColor = "{r}";
+                        awayColor = "{o}";
+                    }
+
+                    var matchString = match.match_number + " @ " + match.location + " - " +
+                        homeColor + match.home_team.country + ": " + match.home_team.goals + ", " +
+                        awayColor + match.away_team.country + ": " + match.away_team.goals;
+
+                    matchString = matchString + "{g}";
+                    if (match.status == "future") {
+                        matchString = matchString + " @ " + new Date(match.datetime).format("H:mm A");
+                    }
+                    else if (match.status == "in progress") {
+                        matchString = matchString + " - In Progress";
+                    }
+                    else {
+                        matchString = matchString + " - Final";
+                    }
+
+                    console.log(matchString);
+
+                    var options = {
+                        host: host,
+                        port: 80,
+                        //port: 8080,
+                        path: '/peggy/write?board=0&x=3&y=' + y + '&text=' + encodeURIComponent(matchString) + "                    ",
+                        agent: false
+                    };
+
+                    http.get(options, function (res) {
+
+                    }).on('error', function (e) {
+                        console.log("Got error: " + e.message);
+                    });
+
+                    y = y + 1;
+                }
+
+            } catch (error) {
+                var options = {
+                    host: host,
+                    port: 80,
+                    //port: 8080,
+                    path: '/peggy/write?board=0&x=3&y=' + y + '&text=' + encodeURIComponent(error.message) + "                    ",
+                    agent: false
+                };
+
+                http.get(options, function (res) {
+
+                }).on('error', function (e) {
+                    console.log("Got error: " + e.message);
+                });
             }
-            else if (match.home_team.goals < match.away_team.goals) {
-                homeColor = "{r}";
-                awayColor = "{o}";
-            }
-
-            var matchString = match.match_number + " @ " + match.location + " - " +
-                homeColor + match.home_team.country + ": " + match.home_team.goals + ", " +
-                awayColor + match.away_team.country + ": " + match.away_team.goals;
-
-            matchString = matchString + "{g}";
-            if (match.status == "future") {
-                matchString = matchString + " @ " + new Date(match.datetime).format("H:mm A");
-            }
-            else if (match.status == "in progress") {
-                matchString = matchString + " - In Progress";
-            }
-            else {
-                matchString = matchString + " - Final";
-            }
-            
-            console.log(matchString);
-
+        }
+        else {
             var options = {
                 host: host,
                 port: 80,
                 //port: 8080,
-                path: '/peggy/write?board=0&x=3&y=' + y + '&text=' + encodeURIComponent(matchString) + "                    ",
+                path: '/peggy/write?board=0&x=3&y=' + y + '&text=' + encodeURIComponent(err) + "                    ",
                 agent: false
             };
 
@@ -79,8 +116,6 @@ function update() {
             }).on('error', function (e) {
                 console.log("Got error: " + e.message);
             });
-
-            y = y + 1;
         }
     });
 }
