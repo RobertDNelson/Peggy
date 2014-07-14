@@ -120,5 +120,5 @@ function update() {
     });
 }
 
-update();
-setInterval(update, 1 * 60 * 1000);
+#update();
+#setInterval(update, 1 * 60 * 1000);
