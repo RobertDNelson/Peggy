@@ -13,15 +13,16 @@ function update() {
         ical.fromURL(url, {}, function(err, data) {
             var array = [];
             var i = 0;
-            var today = new Date();
-            var yesterday = today.setDate(today.getDate() - 1);
+            var today = new Date().setHours(0);
             for (var k in data) {
                 if (data.hasOwnProperty(k)) {
                     var ev = data[k];
-                    if (ev.type == 'VEVENT' && ev.start > yesterday) {
+                    if (ev.type == 'VEVENT' && ev.start > today) {
                         var summary = ev.summary;
                         var start = ev.start;
-                        array[i++] = {summary: summary, start: start}
+                        var end = ev.end;
+//                        console.log(util.inspect(ev));
+                        array[i++] = {summary: summary, start: start, end: end}
                     }
                 }
             }
@@ -34,7 +35,13 @@ function update() {
             rows[0] = "{o}*************** CoCo Events ***************************************************";
 
             for (var i = 0; i < 11; i++) {
-                rows[i + 1] = array[i].start.format("M/D/YY H:mm A") + " - " + array[i].summary;
+                var thisEvent = array[i];
+                if (thisEvent.start.getHours() == 0) {
+                    // This is kinda silly, but if it starts in the first hour of the day we'll assume it's an all day event.
+                    rows[i + 1] = thisEvent.start.format("MMM D") + " - " + thisEvent.summary;
+                } else {
+                    rows[i + 1] = thisEvent.start.format("MMM D at H:mm A") + " - " + thisEvent.summary;
+                }
             }
 
             for (var i = 0; i < 12; i++) {
