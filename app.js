@@ -69,6 +69,17 @@ api.all('/peggy/twitter', function(req, res) {
 	res.end();
 });
 
+api.all('/peggy/discoText', function(req, res) {
+	if (!req.query.text) {
+		res.send(500, {error:'invalid request'});
+		return;
+	}
+	modules['discoText.js'].send({ text: req.query.text });
+	board.clear(1);
+	res.send(200);
+	res.end();
+});
+
 api.listen(8080);
 
 // Launch any modules
