@@ -80,6 +80,13 @@ api.all('/peggy/discoText', function(req, res) {
 	res.end();
 });
 
+api.all('/peggy/discoText/off', function(req, res) {
+	modules['discoText.js'].send({ text: '' });
+	board.clear(1);
+	res.send(200);
+	res.end();
+});
+
 api.listen(8080);
 
 // Launch any modules
