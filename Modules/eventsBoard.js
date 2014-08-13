@@ -8,41 +8,28 @@ var HTMLDecoderEncoder = require("html-encoder-decoder"), encoded = null;
 var ical = require('ical');
 
 function update() {
-//        var url = "http://www.google.com/calendar/ical/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/basic.ics";
-        var url = "https://www.google.com/calendar/ical/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/full-noattendees.ics?futureevents=true&singleevents=true&orderby=starttime";
+    var url = "https://www.google.com/calendar/feeds/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/full?alt=json&orderby=starttime&max-results=11&singleevents=true&sortorder=ascending&futureevents=true";
+    request(url, function(err, res, body) {
+        console.log("res.statusCode == " + res.statusCode);
+        if (!err && res.statusCode == 200) {
+            var eventsObj = JSON.parse(body);
 
-        ical.fromURL(url, {}, function(err, data) {
-            var array = [];
-            var i = 0;
-            var today = new Date().setHours(0);
-            for (var k in data) {
-                if (data.hasOwnProperty(k)) {
-                    var ev = data[k];
-                    if (ev.type == 'VEVENT' && ev.start > today) {
-                        var summary = ev.summary;
-                        var start = ev.start;
-                        var end = ev.end;
-//                        console.log(util.inspect(ev));
-                        array[i++] = {summary: summary, start: start, end: end}
-                    }
-                }
-            }
-
-            array.sort(function(a, b) {
-                return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
-            });
+            console.log("eventsObj: " + util.inspect(eventsObj.feed.entry));
 
             var rows = [];
             rows[0] = "{o}*************** CoCo Events ***************************************************";
 
-            for (var i = 0; i < 11; i++) {
-                var thisEvent = array[i];
-                if (thisEvent.start.getHours() == 0) {
-                    // This is kinda silly, but if it starts in the first hour of the day we'll assume it's an all day event.
-                    rows[i + 1] = thisEvent.start.format("MMM D") + " - " + thisEvent.summary;
+            for (i in eventsObj.feed.entry) {
+                var event = eventsObj.feed.entry[i];
+                var title = event.title.$t;
+                var when = event.gd$when[0].startTime;
+                if (when.split("-").length == 3) {
+                    parts = when.split("-");
+                    when = new Date(parts[0], (parts[1] - 1), parts[2]).format("MMM D");
                 } else {
-                    rows[i + 1] = thisEvent.start.format("MMM D at H:mm A") + " - " + thisEvent.summary;
+                    when = new Date(when).format("MMM D at H:mm A");
                 }
+                rows[i + 1] = when + " - " + title;
             }
 
             for (var i = 0; i < 12; i++) {
@@ -59,7 +46,12 @@ function update() {
                         console.log("Got error: " + e.message);
                     });
             }
-        });
+
+        } else {
+            console.log("result came back " + res.statusCode);
+        }
+
+    })
 }
 
 update();
