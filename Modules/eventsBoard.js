@@ -19,7 +19,7 @@ function update() {
             var rows = [];
             rows[0] = "{o}*************** CoCo Events ***************************************************";
 
-            for (i in eventsObj.feed.entry) {
+            for (var i = 0; i < eventsObj.feed.entry.length; i++) {
                 var event = eventsObj.feed.entry[i];
                 var title = event.title.$t;
                 var when = event.gd$when[0].startTime;
@@ -33,6 +33,8 @@ function update() {
             }
 
             for (var i = 0; i < 12; i++) {
+
+                console.log("row " + i + ": " + rows[i])
 
                 var options = {
                     host: "localhost",
