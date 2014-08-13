@@ -28,9 +28,9 @@ function update() {
                 }
             }
 
-            // array.sort(function(a, b) {
-            //     return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
-            // });
+            array.sort(function(a, b) {
+                return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
+            });
 
             var rows = [];
             rows[0] = "{o}*************** CoCo Events ***************************************************";
