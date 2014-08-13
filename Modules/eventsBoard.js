@@ -8,7 +8,8 @@ var HTMLDecoderEncoder = require("html-encoder-decoder"), encoded = null;
 var ical = require('ical');
 
 function update() {
-        var url = "http://www.google.com/calendar/ical/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/basic.ics";
+//        var url = "http://www.google.com/calendar/ical/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/basic.ics";
+        var url = "https://www.google.com/calendar/ical/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/full-noattendees.ics?futureevents=true&singleevents=true&orderby=starttime";
 
         ical.fromURL(url, {}, function(err, data) {
             var array = [];
@@ -27,9 +28,9 @@ function update() {
                 }
             }
 
-            array.sort(function(a, b) {
-                return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
-            });
+            // array.sort(function(a, b) {
+            //     return a.start < b.start ? -1 : a.start > b.start ? 1 : 0;
+            // });
 
             var rows = [];
             rows[0] = "{o}*************** CoCo Events ***************************************************";
