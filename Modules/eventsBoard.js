@@ -10,11 +10,11 @@ var ical = require('ical');
 function update() {
     var url = "https://www.google.com/calendar/feeds/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/full?alt=json&orderby=starttime&max-results=11&singleevents=true&sortorder=ascending&futureevents=true";
     request(url, function(err, res, body) {
-        console.log("res.statusCode == " + res.statusCode);
+//        console.log("res.statusCode == " + res.statusCode);
         if (!err && res.statusCode == 200) {
             var eventsObj = JSON.parse(body);
 
-            console.log("eventsObj: " + util.inspect(eventsObj.feed.entry));
+//            console.log("eventsObj: " + util.inspect(eventsObj.feed.entry));
 
             var rows = [];
             rows[0] = "{o}*************** CoCo Events ***************************************************";

@@ -6,6 +6,7 @@ var api = express();
 var fork = require('child_process').fork;
 var modules = {};
 var util = require('util');
+var request = require('request');
 
 board.connect();
 
@@ -16,15 +17,36 @@ for (var i = 5; i >= 0; i--) {
 
 // API
 api.all('/peggy/write', function (req, res) {
-	if (!req.query.board || !req.query.x || !req.query.y ||  !req.query.text) {
+	if (!req.query.board || !req.query.x || !req.query.y || !req.query.text) {
 		res.send(500, {error:'invalid request'});
 		return;
 	}
 	res.send(200);
 	res.end();
 
-	var message = new MessageRequest(req.query.board, req.query.x, req.query.y, req.query.text);
-	board.write(message);
+    var today = new Date();
+    var isPirateDay = today.getMonth() == 8 && today.getDate() == 19;
+//    console.log("isPirateDay: " + isPirateDay);
+
+    if (isPirateDay) {
+    	var text = req.query.text.replace(/\"/g, "");
+		request("http://isithackday.com/arrpi.php?format=json&text=" + encodeURIComponent(text), function(err, resp, body) {
+		    if (!err && resp.statusCode == 200) {
+		    	body = body.replace(/\\{3}/g, "");
+//		    	console.log("body: " + body);
+		    	var jsonBody = JSON.parse(body);
+//		    	console.log("jsonBody.translation.pirate: " + jsonBody.translation.pirate);
+		    	var message = new MessageRequest(req.query.board, req.query.x, req.query.y, jsonBody.translation.pirate);
+				board.write(message);
+		    } else {
+		    	var message = new MessageRequest(req.query.board, req.query.x, req.query.y, req.query.text);
+				board.write(message);
+		    }
+		  });
+    } else {
+		var message = new MessageRequest(req.query.board, req.query.x, req.query.y, req.query.text);
+		board.write(message);
+    }
 });
 
 api.all('/peggy/clear', function(req, res) {
