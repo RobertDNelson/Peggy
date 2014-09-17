@@ -28,7 +28,7 @@ api.all('/peggy/write', function (req, res) {
     var isPirateDay = today.getMonth() == 8 && today.getDate() == 19;
 //    console.log("isPirateDay: " + isPirateDay);
 
-    if (isPirateDay) {
+    if (isPirateDay && req.query.board != 4) {
     	var text = req.query.text.replace(/\"/g, "");
 		request("http://isithackday.com/arrpi.php?format=json&text=" + encodeURIComponent(text), function(err, resp, body) {
 		    if (!err && resp.statusCode == 200) {

@@ -34,7 +34,7 @@ function update() {
 
             for (var i = 0; i < 12; i++) {
 
-                console.log("row " + i + ": " + rows[i])
+//                console.log("row " + i + ": " + rows[i])
 
                 var options = {
                     host: "localhost",
