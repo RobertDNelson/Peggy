@@ -45,7 +45,7 @@ function update() {
       var curColorCode = colors[curColor++ % 3];
 
       // var tweetBody = tweet['text'].encode('ascii', 'ignore')
-      var thisTweet = "@" + tweet.user.screen_name + ": " + tweet.text.replace(/[^\x00-\x7F]/g, "").replace(/http:\/\/[a-zA-Z0-9\./\=\-_?]*/g, "");
+      var thisTweet = "@" + tweet.user.screen_name + ": " + tweet.text.replace(/[^\x00-\x7F]/g, "").replace(/http(s)*:\/\/[a-zA-Z0-9\./\=\-_?]*/g, "");
       thisTweet = thisTweet.replace(/&amp;/, "&");
 
       while (curRowNum < maxRows) {
