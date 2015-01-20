@@ -33,10 +33,14 @@ function update() {
 
         if (e.start.dateTime) {
           var eDate = new Date(e.start.dateTime);
-          dateString = eDate.format("MMM D H:mmA");
+
+          var prettyHourString = eDate.format("HH");
+          prettyHourString = prettyHourString.replace(/0(\d)/g, " $1");
+          
+          dateString = eDate.format("MMM D " + prettyHourString + ":mmA");
         } else if (e.start.date) {
           var eDate = new Date(e.start.date);
-          dateString = eDate.format("MMM D       ");
+          dateString = eDate.format("MMM D        ");
         }
 
         rows[i + 1] = " " + dateString + " - " + e.summary;
