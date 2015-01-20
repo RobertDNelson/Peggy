@@ -1,15 +1,16 @@
 {
   "name": "CoCo_Minneapolis_LiteBright",
   "version": "0.0.1",
-  "dependencies" : {
-    "bufferpack" : "*",
-    "express" : "3.x",
-    "request" : "2.x",
-    "xml-digester" : "*",
-    "date-format-lite" : "0.5.x",
-    "sleep" : "1.1.x",
-    "twitter" : "*",
-    "html-encoder-decoder" : "*",
-    "ical" : "*"
+  "dependencies": {
+    "bufferpack": "*",
+    "date-format-lite": "0.5.x",
+    "express": "3.x",
+    "googleapis": "^1.1.1",
+    "html-encoder-decoder": "*",
+    "ical": "*",
+    "request": "2.x",
+    "sleep": "1.1.x",
+    "twitter": "*",
+    "xml-digester": "*"
   }
 }

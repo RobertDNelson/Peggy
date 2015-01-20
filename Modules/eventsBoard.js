@@ -1,59 +1,63 @@
-var request = require('request');
 var http = require('http');
-var xml_digester = require("xml-digester");
-var digester = xml_digester.XmlDigester({});
-require("date-format-lite");
-var util = require('util');
-var HTMLDecoderEncoder = require("html-encoder-decoder"), encoded = null;
-var ical = require('ical');
+var dateFormat = require("date-format-lite");
+var google = require('googleapis');
+var calendar = google.calendar('v3');
+
+var defaultParams = {
+  calendarId: 'cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4@group.calendar.google.com',
+  orderBy: 'startTime',
+  singleEvents: true,
+  maxResults: 11,
+  fields: 'items(summary,start)',
+  key: 'AIzaSyBd50j18XdFyya_oR8QrJFNOjE-JpdsRIg'
+}
 
 function update() {
-    var url = "https://www.google.com/calendar/feeds/cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4%40group.calendar.google.com/public/full?alt=json&orderby=starttime&max-results=11&singleevents=true&sortorder=ascending&futureevents=true";
-    request(url, function(err, res, body) {
-//        console.log("res.statusCode == " + res.statusCode);
-        if (!err && res.statusCode == 200) {
-            var eventsObj = JSON.parse(body);
+  var date = new Date();
+  date.setHours(0);
+  date.setMinutes(0);
+  date.setSeconds(0);
 
-//            console.log("eventsObj: " + util.inspect(eventsObj.feed.entry));
+  var p = JSON.parse(JSON.stringify(defaultParams));
+  p['timeMin'] = date.toISOString();
 
-            var rows = [];
-            rows[0] = "{o}*************** CoCo Events ***************************************************";
+  calendar.events.list(p,function (err, response) {
+    if(!err) {
+      var rows = [];
+      rows[0] = "{o}*************** CoCo Events ***************************************************";
 
-            for (var i = 0; i < eventsObj.feed.entry.length; i++) {
-                var event = eventsObj.feed.entry[i];
-                var title = event.title.$t;
-                var when = event.gd$when[0].startTime;
-                if (when.split("-").length == 3) {
-                    parts = when.split("-");
-                    when = new Date(parts[0], (parts[1] - 1), parts[2]).format("MMM D");
-                } else {
-                    when = new Date(when).format("MMM D at H:mm A");
-                }
-                rows[i + 1] = when + " - " + title;
-            }
+      var events = response.items;
+      for (var i = 0; i < events.length; i++) {
+        var e = events[i];
+        var dateString = "";
 
-            for (var i = 0; i < 12; i++) {
-
-//                console.log("row " + i + ": " + rows[i])
-
-                var options = {
-                    host: "localhost",
-                    port: 8080,
-                    path: "/peggy/write?board=3&x=0&y=" + i + "&text=" + encodeURIComponent(" " + rows[i] + "                                                            "),
-                    agent: false
-                };
-
-                http.get(options, function(res) {
-                    }).on('error', function(e) {
-                        console.log("Got error: " + e.message);
-                    });
-            }
-
-        } else {
-            console.log("result came back " + res.statusCode);
+        if (e.start.dateTime) {
+          var eDate = new Date(e.start.dateTime);
+          dateString = eDate.format("MMM D H:mmA");
+        } else if (e.start.date) {
+          var eDate = new Date(e.start.date);
+          dateString = eDate.format("MMM D       ");
         }
 
-    })
+        rows[i + 1] = " " + dateString + " - " + e.summary;
+      }
+
+      for (var i = 0; i < 12; i++) {
+        var options = {
+          host: "10.105.4.251",
+          port: 8080,
+          path: "/peggy/write?board=3&x=0&y=" + i + "&text=" + encodeURIComponent(rows[i] + "                                                            "),
+          agent: false
+        }
+
+        http.get(options, function(res) {}).on('error', function(e) {
+          console.log("Got error: " + e.message);
+        });
+      }
+    } else {
+      console.log('Events Error', err);
+    }
+  });
 }
 
 update();
