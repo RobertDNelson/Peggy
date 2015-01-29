@@ -43,7 +43,11 @@ function update() {
           dateString = eDate.format("MMM " + prettyDayString + " " + prettyHourString + ":mmA");
         } else if (e.start.date) {
           var eDate = new Date(e.start.date);
-          dateString = eDate.format("MMM D        ");
+
+          var prettyDayString = eDate.format("DD");
+          prettyDayString = prettyDayString.replace(/0(\d)/g, " $1");
+
+          dateString = eDate.format("MMM " + prettyDayString + "        ");
         }
 
         rows[i + 1] = " " + dateString + " - " + e.summary;
