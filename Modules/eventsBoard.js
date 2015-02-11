@@ -42,7 +42,8 @@ function update() {
 
           dateString = eDate.format("MMM " + prettyDayString + " " + prettyHourString + ":mmA");
         } else if (e.start.date) {
-          var eDate = new Date(e.start.date);
+          var parts = e.start.date.split("-")
+          var eDate = new Date(parts[0],parts[1],parts[2]);
 
           var prettyDayString = eDate.format("DD");
           prettyDayString = prettyDayString.replace(/0(\d)/g, " $1");
@@ -61,6 +62,7 @@ function update() {
           agent: false
         }
 
+        console.log(rows[i]);
         http.get(options, function(res) {}).on('error', function(e) {
           console.log("Got error: " + e.message);
         });
