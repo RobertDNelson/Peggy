@@ -1,66 +1,72 @@
 var request = require('request');
 var http = require('http');
-var xml_digester = require("xml-digester");
+var xml_digester = require('xml-digester');
 var digester = xml_digester.XmlDigester({});
-require("date-format-lite");
+require('date-format-lite');
+
+var options = {
+    host: 'localhost',
+    port: 8080,
+    agent: false
+};
+
+var PADDING = '                    ';
 
 function update() {
-        var maxCharsPerRow = 32;
-        var weatherFeedUrl = 'http://www.weather.gov/xml/current_obs/KMSP.xml';
-        var options = {
-                host: 'localhost',
-                port: 8080,
-                path: '/peggy/write?board=4&x=1&y=0&text=' + encodeURIComponent(new Date().format('DDDD, MMMM D H:mm A') + "                    "),
-                agent: false
-            };
 
-        http.get(options, function(res) {
-            }).on('error', function(e) {
-                console.log("Got error: " + e.message);
+    var formattedDate = 'Unknown';
+    try {
+        formattedDate = new Date().format('DDDD, MMMM D H:mm A');
+    } catch (e) {
+        console.log('Unable to format date: ' + e);
+    }
+
+    options.path = '/peggy/write?board=4&x=1&y=0&text=' + encodeURIComponent(formattedDate + PADDING);
+    http.get(options).on('error', function (e) {
+        e = e || {};
+        console.log('Got error: ' + e.message);
+    });
+
+    request('http://www.weather.gov/xml/current_obs/KMSP.xml', function (err, resp, body) {
+
+        if (err) {
+            console.log('Failed request to get weather: ' + err);
+            return;
+        }
+
+        digester.digest(body, function (err, result) {
+
+            if (err) {
+                console.log('Failed to parse XML: ' + err);
+                return;
+            }
+
+            result = result || {};
+            var observation = result.current_observation || {};
+            var weather = observation.weather || {};
+            var temperature = observation.temperature_string || '';
+            var wind = observation.wind_string || '';
+
+            options.path = '/peggy/write?board=4&x=3&y=1&text=' + encodeURIComponent(weather + PADDING);
+            http.get(options).on('error', function (e) {
+                e = e || {};
+                console.log('Got error: ' + e.message);
             });
 
-        request(weatherFeedUrl, function(err, resp, body) {
-            digester.digest(body, function(err, result) {
+            options.path = '/peggy/write?board=4&x=3&y=2&text=' + encodeURIComponent('Temperature: ' + temperature + PADDING);
+            http.get(options).on('error', function (e) {
+                e = e || {};
+                console.log('Got error: ' + e.message);
+            });
 
-                var options = {
-                    host: 'localhost',
-                    port: 8080,
-                    path: '/peggy/write?board=4&x=3&y=1&text=' + encodeURIComponent(result.current_observation.weather + "                    "),
-                    agent: false
-                };
-
-                http.get(options, function(res) {
-
-                    }).on('error', function(e) {
-                        console.log("Got error: " + e.message);
-                    });
-
-                options = {
-                    host: 'localhost',
-                    port: 8080,
-                    path: '/peggy/write?board=4&x=3&y=2&text=' + encodeURIComponent('Temperature: ' + result.current_observation.temperature_string + "                    "),
-                    agent: false
-                }
-
-                http.get(options, function(res) {
-                    }).on('error', function(e) {
-                        console.log("Got error: " + e.message);
-                    });
-
-                options = {
-                    host: 'localhost',
-                    port: 8080,
-                    path: '/peggy/write?board=4&x=3&y=3&text=' + encodeURIComponent('Wind: ' + result.current_observation.wind_string + "                    "),
-                    agent: false
-                };
-
-                http.get(options, function(res) {
-                    }).on('error', function(e) {
-                        console.log("Got error: " + e.message);
-                    });
+            options.path = '/peggy/write?board=4&x=3&y=3&text=' + encodeURIComponent('Wind: ' + wind + PADDING);
+            http.get(options).on('error', function (e) {
+                e = e || {};
+                console.log('Got error: ' + e.message);
             });
         });
+    });
 }
 
 update();
-setInterval(update, 1 * 60 * 1000);
+setInterval(update, 60 * 1000);
