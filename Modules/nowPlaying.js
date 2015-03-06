@@ -1,55 +1,63 @@
 var request = require('request');
 var http = require('http');
-var xml_digester = require("xml-digester");
+var xml_digester = require('xml-digester');
 var digester = xml_digester.XmlDigester({});
-require("date-format-lite");
+require('date-format-lite');
+
+var options = {
+    host: 'localhost',
+    port: 8080,
+    agent: false
+};
+
+var PADDING = '                                                              ';
 
 function update() {
-        var maxCharsPerRow = 32;
-        var nowPlayingFeedUrl = 'http://ws.audioscrobbler.com/1.0/user/CoCoDT/recenttracks.rss?limit=3';
 
-        request(nowPlayingFeedUrl, function(err, resp, body) {
-            digester.digest(body, function(err, result) {
+    var nowPlayingFeedUrl = 'http://ws.audioscrobbler.com/1.0/user/CoCoDT/recenttracks.rss?limit=3';
 
-                var options = {
-                    host: 'localhost',
-                    port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent("{g}Now Playing: " + result.rss.channel.item[0].title + "                                                              "),
-                    agent: false
-                };
+    request(nowPlayingFeedUrl, function (err, resp, body) {
 
-                http.get(options, function(res) {
-                    }).on('error', function(e) {
-                        console.log("Got error: " + e.message);
-                    });
+        if (err) {
+            console.log('could not reach now playing server: ' + err);
+            return;
+        }
 
-                options = {
-                    host: 'localhost',
-                    port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=10&text=' + encodeURIComponent("{o}Last Played: " + result.rss.channel.item[1].title + "                                                              "),
-                    agent: false
-                };
+        digester.digest(body, function (err, result) {
 
-                http.get(options, function(res) {
-                    }).on('error', function(e) {
-                        console.log("Got error: " + e.message);
-                    });
+            if (err) {
+                console.log('could not parse now playing result: ' + err);
+                return;
+            }
 
-                options = {
-                    host: 'localhost',
-                    port: 8080,
-                    path: '/peggy/write?board=1&x=1&y=11&text=' + encodeURIComponent("{r}Double Prev: " + result.rss.channel.item[2].title + "                                                              "),
-                    agent: false
-                };
+            result = result || {};
+            var rss = result.rss || {};
+            var channel = rss.channel || {};
+            var items = channel.item || [];
+            var nowPlaying = items[0] || {};
+            var lastPlayed = items[1] || {};
+            var doublePrev = items[2] || {};
 
-                http.get(options, function(res) {
-                    }).on('error', function(e) {
-                        console.log("Got error: " + e.message);
-                    });
+            options.path = '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent('{g}Now Playing: ' + nowPlaying.title + PADDING);
+            http.get(options).on('error', function (e) {
+                e = e || {};
+                console.log('Got error: ' + e.message);
+            });
 
+            options.path = '/peggy/write?board=1&x=1&y=10&text=' + encodeURIComponent('{o}Last Played: ' + lastPlayed.title + PADDING);
+            http.get(options).on('error', function (e) {
+                e = e || {};
+                console.log('Got error: ' + e.message);
+            });
+
+            options.path = '/peggy/write?board=1&x=1&y=11&text=' + encodeURIComponent('{r}Double Prev: ' + doublePrev.title + PADDING);
+            http.get(options).on('error', function (e) {
+                e = e || {};
+                console.log('Got error: ' + e.message);
             });
         });
+    });
 }
 
 update();
-setInterval(update, 20000);
+setInterval(update, 10000);
