@@ -27,8 +27,10 @@ function update() {
       rows[0] = "{o}*************** CoCo Events ***************************************************";
 
       var events = response.items;
+
       for (var i = 0; i < events.length; i++) {
         var e = events[i];
+        
         var dateString = "";
 
         if (e.start.dateTime) {
@@ -42,8 +44,8 @@ function update() {
 
           dateString = eDate.format("MMM " + prettyDayString + " " + prettyHourString + ":mmA");
         } else if (e.start.date) {
-          var parts = e.start.date.split("-")
-          var eDate = new Date(parts[0],parts[1],parts[2]);
+          var parts = e.start.date.split("-");
+          var eDate = new Date(parts[0],parts[1]-1,parts[2]);
 
           var prettyDayString = eDate.format("DD");
           prettyDayString = prettyDayString.replace(/0(\d)/g, " $1");
