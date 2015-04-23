@@ -1,0 +1,28 @@
+body { background-color: #000; color: #AAA; }
+#main {
+	position: relative;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 9px;
+}
+pre { padding: 3px; margin: 0; }
+.board-big {
+	width: 435px;
+	height: 201px;
+	background-color: #444;
+	position: absolute;
+}
+.board-small {
+	width: 176px;
+	height: 201px;
+	background-color: #444;
+	position: absolute;
+}
+.board-0, .board-1, .board-4 { top: 0px; }
+.board-2, .board-3, .board-5 { top: 211px; }
+.board-0, .board-2 { left: 0px; }
+.board-1, .board-3 { left: 445px; }
+.board-4, .board-5 { left: 890px; }
+.board-row { padding: 2px; background-color: #222; margin-bottom: 3px; height: 10px; overflow: hidden; }
+.color-g { color: #0A0; }
+.color-o { color: #E70; }
+.color-r { color: #C00; }
