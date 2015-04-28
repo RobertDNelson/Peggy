@@ -24,7 +24,7 @@ function update() {
     var randomColor = colors[Math.floor(Math.random() * (3))];
 
     var options = {
-      host: '10.105.4.251',
+      host: 'localhost', // 10.105.4.251
       path: '/peggy/write?board=1&x=' + (randomSlot + 5) + '&y=4&text=' + encodeURIComponent(randomColor + randomChar),
       agent: false
     };

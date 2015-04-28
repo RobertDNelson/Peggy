@@ -1,5 +1,12 @@
 var fs = require('fs');
-var board = require('./Outputters/Board.js');
+var board;
+if (process.argv.indexOf('live') >= 0) {
+	console.log("Yep, this is LIVE.");
+	board = require('./Outputters/Board.js');
+} else {
+	console.log("Starting up in DEV mode.");
+	board = require('./Outputters/DevBoard.js');
+}
 var MessageRequest = require('./models/message_request.js');
 var express = require('express');
 var api = express();
@@ -7,6 +14,9 @@ var fork = require('child_process').fork;
 var modules = {};
 var util = require('util');
 var request = require('request');
+
+api.set('view engine', 'jade');
+api.use(express.static('public'));
 
 board.connect();
 
@@ -47,6 +57,16 @@ api.all('/peggy/write', function (req, res) {
 		var message = new MessageRequest(req.query.board, req.query.x, req.query.y, req.query.text);
 		board.write(message);
     }
+});
+
+api.all('/peggy/dev', function(req, res) {
+	res.render('dev', {});
+});
+
+api.all('/peggy/boardhtml', function(req, res) {
+	var boardNumber = parseInt(req.query.board);
+	res.send(board.getHtml(boardNumber));
+	res.end();
 });
 
 api.all('/peggy/clear', function(req, res) {

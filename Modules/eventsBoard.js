@@ -58,7 +58,7 @@ function update() {
 
       for (var i = 0; i < 12; i++) {
         var options = {
-          host: "10.105.4.251",
+          host: "localhost", // 10.105.4.251
           port: 8080,
           path: "/peggy/write?board=3&x=0&y=" + i + "&text=" + encodeURIComponent(rows[i] + "                                                            "),
           agent: false
