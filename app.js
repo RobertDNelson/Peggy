@@ -1,6 +1,12 @@
 var fs = require('fs');
-// var board = require('./Outputters/Board.js');
-var board = require('./Outputters/DevBoard.js');
+var board;
+if (process.argv.indexOf('live') >= 0) {
+	console.log("Yep, this is LIVE.");
+	board = require('./Outputters/Board.js');
+} else {
+	console.log("Starting up in DEV mode.");
+	board = require('./Outputters/DevBoard.js');
+}
 var MessageRequest = require('./models/message_request.js');
 var express = require('express');
 var api = express();
