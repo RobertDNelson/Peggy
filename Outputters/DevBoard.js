@@ -5,15 +5,15 @@ module.exports = function () {
 
   DevBoard = function () {
     var BOARDS = {
-        '0': { 'cols': 80, 'rows': 12, 'right': 1, 'below': 2, 'pegml': [], 'html': '' },
-        '1': { 'cols': 80, 'rows': 12, 'right': 4, 'below': 3, 'pegml': [], 'html': '' },
-        '4': { 'cols': 32, 'rows': 12, 'right': -1, 'below': 5, 'pegml': [], 'html': '' },
+        '0': { 'cols': 80, 'rows': 12, 'right': 1, 'below': 2, 'chars': [] },
+        '1': { 'cols': 80, 'rows': 12, 'right': 4, 'below': 3, 'chars': [] },
+        '4': { 'cols': 32, 'rows': 12, 'right': -1, 'below': 5, 'chars': [] },
 
-        '2': { 'cols': 80, 'rows': 12, 'right': 3, 'below': -1, 'pegml': [], 'html': '' },
-        '3': { 'cols': 80, 'rows': 12, 'right': 5, 'below': -1, 'pegml': [], 'html': '' },
-        '5': { 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'pegml': [], 'html': '' },
+        '2': { 'cols': 80, 'rows': 12, 'right': 3, 'below': -1, 'chars': [] },
+        '3': { 'cols': 80, 'rows': 12, 'right': 5, 'below': -1, 'chars': [] },
+        '5': { 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'chars': [] },
 
-        '6': { 'cols': 80, 'rows': 10, 'right': -1, 'below': -1, 'pegml': [], 'html': '' },
+        '6': { 'cols': 80, 'rows': 10, 'right': -1, 'below': -1, 'chars': [] },
       };
 
     var allowWrites = true;
@@ -55,29 +55,19 @@ module.exports = function () {
       return message;
     }
 
-    // [ {r}Hello                       ]
-    //     -->    World   <-- (starts at x=7)
-    function asciiXtoPegmlX(message, x) {
-      var pegmlX = 0;
-      var countX = 0;
-      var maxLen = message.length;
-      while (countX < x && pegmlX < maxLen) {
-        if (message.charAt(pegmlX) == "{") {
-          pegmlX += 4; // count the {o} color + the character on which it starts
-        } else {
-          pegmlX++;
+    function charsToHtml(charArray) {
+      if (charArray.length == 0) return "";
+      var c = charArray[0][1],
+          out = '<span class="color-'+c+'">';
+      for (var i=0; i<charArray.length; i++) {
+        if (charArray[i][1] != c) {
+          c = charArray[i][1];
+          out += '</span><span class="color-'+c+'">';
         }
-        countX++;
+        out += charArray[i][0];
       }
-      // console.log("x=" + x + ", pegmlX=" + pegmlX + ", message=[" + message + "]");
-      return pegmlX;
-    }
-
-    function pegmlToHtml(message) {
-      message = message.replace(/\{g\}/g, '</span><span class="color-g">');
-      message = message.replace(/\{o\}/g, '</span><span class="color-o">');
-      message = message.replace(/\{r\}/g, '</span><span class="color-r">');
-      return '<span class="color-g">' + message + '</span>';
+      out += '</span>';
+      return out;
     }
 
 
@@ -93,26 +83,31 @@ module.exports = function () {
           // console.log("DevBoard.write:");
           // console.log(req);
           var board = BOARDS[req.board.toString()];
-          var curPegml = board.pegml[req.y] || "";
 
-          var pegmlX = asciiXtoPegmlX(curPegml, req.x);
-          var pegmlChars = asciiLength(req.text);
-          var pegmlEndX = asciiXtoPegmlX(curPegml, req.x + pegmlChars);
-
-          // temp write
-          // console.log("WANT: [" + req.text + "] at x=" + req.x + ", length=" + pegmlChars);
-          curPegml = (curPegml.substr(0, pegmlX) + req.text + curPegml.substr(pegmlEndX));
-          // console.log("RESULT: [" + curPegml + "]");
-
-          // save for next pass
-          board.pegml[req.y] = curPegml;
+          // update charArray
+          var chars = board.chars[req.y] || [], c=null, offset=0;
+          for (var p=0, m=req.text.length; p<m; ) {
+            var t = req.text[p];
+            if (t == "{") {
+              c = req.text[p+1];
+              p+=3;
+            } else {
+              if (c == null) c = "g";
+              chars[req.x+offset] = [ req.text[p], c ]; // each character is represented by an array: [char:String, color:String];
+              offset++;
+              p++;
+            }
+          }
+          board.chars[req.y] = chars; // just in case we made a new array above
+          // console.log("Wrote to row " + req.y + ":");
+          // console.log(chars);
         }
       },
       getHtml: function(boardNumber) {
         var board = BOARDS[boardNumber.toString()];
-        var html = '', len = board.pegml.length;
+        var html = '', len = board.chars.length;
         for (var i=0; i<len; i++) {
-          html += '<div class="board-row">' + pegmlToHtml(board.pegml[i]) + '</div>';
+          html += '<div class="board-row">' + charsToHtml(board.chars[i]) + '</div>';
         }
         return html;
       },
