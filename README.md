@@ -1,3 +1,7 @@
+Developer Console
+---------------
+Running in dev mode is now the default behavior (run: node app.js). In dev mode, Peggy provides an HTML-based simulator for the LiteBrite. You can access this in your browser at /peggy/dev. To run the server in live mode (i.e. to connect to the LiteBrite directly), run: node app.js live.
+
 API
 ---------------
 There are two routes to the API. They respond to any HTTP verb. All example query paramaters are required.
