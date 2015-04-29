@@ -24,7 +24,7 @@ function update() {
   calendar.events.list(p,function (err, response) {
     if(!err) {
       var rows = [];
-      rows[0] = "{o}*************** CoCo Events ***************************************************";
+      rows[0] = "{o} ************** CoCo Events ***************************************************";
 
       var events = response.items;
 
