@@ -64,7 +64,11 @@ module.exports = function () {
           c = charArray[i][1];
           out += '</span><span class="color-'+c+'">';
         }
-        out += charArray[i][0];
+        if (charArray[i][0] == String.fromCharCode(127)) {
+          out += '<span class="c127">&nbsp;</span>';
+        } else {
+          out += charArray[i][0];
+        }
       }
       out += '</span>';
       return out;

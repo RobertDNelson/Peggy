@@ -26,3 +26,7 @@ pre { padding: 3px; margin: 0; }
 .color-g { color: #0A0; }
 .color-o { color: #E70; }
 .color-r { color: #C00; }
+
+.color-g .c127 { background-color: #0A0; }
+.color-o .c127 { background-color: #E70; }
+.color-r .c127 { background-color: #C00; }
