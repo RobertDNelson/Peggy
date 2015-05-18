@@ -96,10 +96,12 @@ module.exports = function () {
         buffer.writeUInt8(message.board+32,1);  // display + 32
         buffer.writeUInt8(row+0x20,2); // row
         buffer.writeUInt8(col+0x20,3); // col
-        buffer.write(text,4);
+        buffer.write(text,4, buffer.length-4, 'ascii');
         buffer.writeUInt8(0x04,4+text.length);
         return buffer;
     }
+
+
 
     var topBoardQueue = [],
         bottomBoardQueue = [];
