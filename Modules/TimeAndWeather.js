@@ -33,12 +33,11 @@ var wterms = {
 var weather_clear = false,
     weather_type = wtypes.NONE;
 
-var board = { id: 5, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1 };
+var board = { id: 4, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
 
 var pix = [];
 var pcolor = [];
 var x;
-var firstRow = 1;
 var sunBlink = 1;
 
 var PADDING = '                    ';
@@ -57,8 +56,7 @@ function getWeather() {
         console.log('Unable to format date: ' + e);
     }
 
-    options.path = '/peggy/write?board=4&x=1&y=0&text=' + encodeURIComponent(formattedDate + PADDING);
-    http.get(options).on('error', simpleLogError);
+    writeCell(1, 0, formattedDate + PADDING);
 
     request('http://w1.weather.gov/xml/current_obs/KMSP.xml', function (err, resp, body) {
 
@@ -94,14 +92,9 @@ function getWeather() {
 
             // update the board
 
-            options.path = '/peggy/write?board=4&x=3&y=1&text=' + encodeURIComponent(weather + PADDING);
-            http.get(options).on('error', simpleLogError);
-
-            options.path = '/peggy/write?board=4&x=3&y=2&text=' + encodeURIComponent('Temperature: ' + temperature + PADDING);
-            http.get(options).on('error', simpleLogError);
-
-            options.path = '/peggy/write?board=4&x=3&y=3&text=' + encodeURIComponent('Wind: ' + wind + PADDING);
-            http.get(options).on('error', simpleLogError);
+            writeCell(3, 1, weather + PADDING);
+            writeCell(3, 2, temperature + PADDING);
+            writeCell(3, 3, 'Wind: ' + wind + PADDING);
         });
     });
 }
@@ -109,7 +102,7 @@ function getWeather() {
 function drawWeather() {
     if (weather_clear) {
         weather_clear = false;
-        clearLines(1);
+        clearLines();
     }
 
     switch (weather_type) {
@@ -210,8 +203,7 @@ function snowAndRain() {
         // find an open spot
         var col = getOpenCol();
         if (col >= 0) {
-            // console.log("Adding a new pixel at " + col);
-            pix[col] = firstRow;
+            pix[col] = board.animStartRow;
             pcolor[col] = getRandColor();
         }
     }
@@ -221,17 +213,13 @@ function snowAndRain() {
     var bRain = (weather_type == wtypes.RAINY);
 
     // draw all relevant rows
-    for (var y=firstRow; y<board.rows; y++) {
+    for (var y=board.animStartRow, yMax=board.animStartRow+board.animRowCount; y<yMax; y++) {
         if (pix.indexOf(y) || pix.indexOf(y-1)) {
             // we have SOMETHING to write here - pixel or space
             var line = "", write = false;
             for (x=0; x<board.cols; x++) {
-                if (bRain && pix[x] == y+2) {
+                if (pix[x] == y+1) {
                     line += " ";
-                    write = true;
-                    //writeCell(x, y, " ");
-                } else if (pix[x] == y+1) {
-                    line += (bRain) ? pcolor[x] + cChar : " ";
                     write = true;
                 } else if (pix[x] == y) {
                     line += pcolor[x] + cChar;
@@ -265,10 +253,13 @@ function initDrawWeather() {
         pix[x] = -1;
         pcolor[x] = "";
     }
+
+    // // draw the top line
+    // options.path = '/peggy/write?board=' + board.id + '&x=0&y=0&text=' + encodeURIComponent('{g}' + repeatString('*', board.cols));
+    // http.get(options).on('error', simpleLogError);
+
     // clear the drawing board
-    options.path = '/peggy/write?board=' + board.id + '&x=0&y=0&text=' + encodeURIComponent('{g}' + repeatString('*', board.cols));
-    http.get(options).on('error', simpleLogError);
-    clearLines(1);
+    clearLines();
 }
 
 function repeatString(str, num) {
@@ -308,10 +299,10 @@ function changeRange(inMin, inMax, value, outMin, outMax, bRound, bClip) {
     return n;
 }
 
-function clearLines(topLine) {
-    for (var y=topLine; y<board.rows; y++) {
-        options.path = '/peggy/write?board='+board.id+'&x=0&y='+y+'&text=' + encodeURIComponent(repeatString(' ', board.cols));
-        http.get(options).on('error', simpleLogError);
+function clearLines() {
+    var line = repeatString(" ", board.cols);
+    for (var y=board.animStartRow, yMax=board.animStartRow+board.animRowCount; y<yMax; y++) {
+        writeCell(0, y, line);
     }
 }
 
