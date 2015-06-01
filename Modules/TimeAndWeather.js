@@ -89,6 +89,7 @@ function getWeather() {
             }
             if (wt != weather_type) weather_clear = true;
             weather_type = wt;
+            // weather_type = wtypes.SNOWY;
 
             // update the board
 
@@ -161,23 +162,23 @@ function sunAndClouds() {
         } else if (sunBlink == 0) {
             writeColor = '{o}';
             writeLines = [
-                "  " + b7 + "  ",
-                "- " + b7 + " -",
-                "    "+b3+"    ",
-                "     .      "
+                "   "+b3+"   ",
+                "- " +b5+ " -",
+                "   "+b3+"   ",
+                "    .    "
             ];
         } else if (sunBlink == 1) {
             writeColor = '{o}';
             writeLines = [
-                "  " + b7 + "  ",
-                "  " + b7 + "  ",
-                "    "+b3+"    ",
-                "            "
+                "   "+b3+"    ",
+                "  " +b5+ "   ",
+                "   "+b3+"    ",
+                "         "
             ];
         }
 
         for (var i=0, imax=writeLines.length; i<imax; i++) {
-            moveWriteCell(0, i+1, writeColor, writeLines[i]);
+            moveWriteCell(0, i+board.animStartRow, writeColor, writeLines[i]);
         }
     }
 
