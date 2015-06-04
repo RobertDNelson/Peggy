@@ -52,7 +52,7 @@ function update() {
 
         if (thisTweet.length < maxCharsPerRow - colorlessLength(thisRow)) {
           // This tweet will fit nicely into this row
-          thisRow += curColorCode + thisTweet.substring(0, maxCharsPerRow - colorlessLength(thisRow)) + " ";
+          thisRow += curColorCode + thisTweet.substring(0, maxCharsPerRow - colorlessLength(thisRow)) + "   ";
           break;
         } else {
           // We'll have to break this tweet into two rows

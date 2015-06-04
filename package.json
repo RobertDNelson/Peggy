@@ -10,7 +10,7 @@
     "ical": "*",
     "request": "2.x",
     "sleep": "1.1.x",
-    "twitter": "*",
+    "twitter": "0.2.9",
     "xml-digester": "*",
     "jade": "*"
   }
