@@ -117,14 +117,12 @@ api.all('/peggy/discoText', function(req, res) {
 		return;
 	}
 	modules['discoText.js'].send({ text: req.query.text });
-	board.clear(1);
 	res.send(200);
 	res.end();
 });
 
 api.all('/peggy/discoText/off', function(req, res) {
 	modules['discoText.js'].send({ text: '' });
-	board.clear(1);
 	res.send(200);
 	res.end();
 });

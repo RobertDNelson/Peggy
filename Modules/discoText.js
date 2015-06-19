@@ -2,10 +2,35 @@ var http = require('http');
 
 var colors = ['{g}', '{r}', '{o}'];
 
+var board = {id: 1, 'cols': 80, 'rows': 12, discoRow: 4, discoCol: 5};
+
+var options = {
+  host: 'localhost', // 10.105.4.251
+  port: 8080,
+  agent: false
+};
+
 process.on('message', function(search) {
   process.env['discoTextText'] = search['text'];
+  drawLine();
   update();
 });
+
+function drawLine() {
+  var text = process.env['discoTextText'];
+  if (text && text.length > 0) {
+    var out = repeatString(" ", board.discoCol);
+    for (var i=0; i<text.length; i++) {
+      var randomColor = colors[Math.floor(Math.random() * (3))];
+      out += randomColor + text.substring(i, i + 1);
+    }
+    out += repeatString(" ", board.cols - text.length - board.discoCol);
+    writeCell(0, board.discoRow, out);
+    console.log("Writing \"" + out + "\"");
+  } else {
+    writeCell(0, board.discoRow, repeatString(" ", board.cols));
+  }
+}
 
 function update() {
 
@@ -23,17 +48,22 @@ function update() {
 
     var randomColor = colors[Math.floor(Math.random() * (3))];
 
-    var options = {
-      host: 'localhost', // 10.105.4.251
-      path: '/peggy/write?board=1&x=' + (randomSlot + 5) + '&y=4&text=' + encodeURIComponent(randomColor + randomChar),
-      agent: false
-    };
-
-    http.get(options, function(res) {
-      }).on('error', function(e) {
-        console.log("Got error: " + e.message);
-      });
+    writeCell(randomSlot + board.discoCol, board.discoRow, randomColor + randomChar);
   }
+}
+
+function repeatString(str, num) {
+    return new Array( num + 1 ).join( str );
+}
+
+function writeCell(x, y, msg) {
+    options.path = "/peggy/write?board=" + board.id + "&x=" + x + "&y=" + y + "&text=" + encodeURIComponent(msg);
+    http.get(options).on('error', simpleLogError);
+}
+
+function simpleLogError(e) {
+    e = e || {};
+    console.log('Got error: ' + e.message);
 }
 
 update();
