@@ -23,7 +23,7 @@ process.on('message', function(search) {
 
 function update() {
 
-  var searchTerm = process.env['twitterSearchTerm'] || "@CoCoMSP";
+  var searchTerm = process.env['twitterSearchTerm'] || "@exploreCOCO";
 
   twit.search(searchTerm, function(data) {
     var curRowNum = 1;
