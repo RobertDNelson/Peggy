@@ -16,7 +16,10 @@ function update() {
 
     var nowPlayingFeedUrl = 'http://ws.audioscrobbler.com/1.0/user/CoCoDT/recenttracks.rss?limit=3';
 
-    request(nowPlayingFeedUrl, function (err, resp, body) {
+    request({
+        url:nowPlayingFeedUrl,
+        followRedirect: false
+    }, function (err, resp, body) {
 
         if (err) {
             console.log('could not reach now playing server: ' + err);
@@ -27,16 +30,16 @@ function update() {
 
             if (err) {
                 console.log('could not parse now playing result: ' + err);
-                return;
+                // return;
             }
 
             result = result || {};
             var rss = result.rss || {};
             var channel = rss.channel || {};
             var items = channel.item || [];
-            var nowPlaying = items[0] || {};
-            var lastPlayed = items[1] || {};
-            var doublePrev = items[2] || {};
+            var nowPlaying = items[0] || {title: "The Beatles - Help!"};
+            var lastPlayed = items[1] || {title: "Jonathan Coulton - Code Monkey"};
+            var doublePrev = items[2] || {title: err};
 
             options.path = '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent('{g}Now Playing: ' + nowPlaying.title + PADDING);
             http.get(options).on('error', function (e) {
