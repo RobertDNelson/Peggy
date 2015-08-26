@@ -14,7 +14,9 @@ var PADDING = '                                                              ';
 
 function update() {
 
-    var nowPlayingFeedUrl = 'http://ws.audioscrobbler.com/1.0/user/CoCoDT/recenttracks.rss?limit=3';
+    // TODO: this API key was stolen from some idiot
+    // who checked it into their public github
+    var nowPlayingFeedUrl = 'http://ws.audioscrobbler.com/2.0?method=user.getRecentTracks&user=CoCoDT&api_key=a6ab4b9376e54cdb06912bfbd9c1f288&limit=3';
 
     request({
         url:nowPlayingFeedUrl,
@@ -30,30 +32,38 @@ function update() {
 
             if (err) {
                 console.log('could not parse now playing result: ' + err);
-                // return;
+                return;
             }
 
             result = result || {};
-            var rss = result.rss || {};
-            var channel = rss.channel || {};
-            var items = channel.item || [];
-            var nowPlaying = items[0] || {title: "The Beatles - Help!"};
-            var lastPlayed = items[1] || {title: "Jonathan Coulton - Code Monkey"};
-            var doublePrev = items[2] || {title: err};
+            var rss = result.lfm || {};
+            var channel = rss.recenttracks || {};
+            var items = channel.track || [];
+            var nowPlaying = items[0] || {name:'?'};
+            var lastPlayed = items[1] || {name:'?'};
+            var doublePrev = items[2] || {name:'?'};
 
-            options.path = '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent('{g}Now Playing: ' + nowPlaying.title + PADDING);
+            var nowPlayingText = '{g}Now Playing: ' + nowPlaying.name + PADDING;
+            var lastPlayedText = '{o}Last Played: ' + lastPlayed.name + PADDING;
+            var doublePrevText = '{r}Double Prev: ' + doublePrev.name + PADDING;
+
+            console.log(nowPlayingText + '\n');
+            console.log(lastPlayedText + '\n');
+            console.log(doublePrevText + '\n');
+
+            options.path = '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent(nowPlayingText);
             http.get(options).on('error', function (e) {
                 e = e || {};
                 console.log('Got error: ' + e.message);
             });
 
-            options.path = '/peggy/write?board=1&x=1&y=10&text=' + encodeURIComponent('{o}Last Played: ' + lastPlayed.title + PADDING);
+            options.path = '/peggy/write?board=1&x=1&y=10&text=' + encodeURIComponent(lastPlayedText);
             http.get(options).on('error', function (e) {
                 e = e || {};
                 console.log('Got error: ' + e.message);
             });
 
-            options.path = '/peggy/write?board=1&x=1&y=11&text=' + encodeURIComponent('{r}Double Prev: ' + doublePrev.title + PADDING);
+            options.path = '/peggy/write?board=1&x=1&y=11&text=' + encodeURIComponent(doublePrevText);
             http.get(options).on('error', function (e) {
                 e = e || {};
                 console.log('Got error: ' + e.message);
