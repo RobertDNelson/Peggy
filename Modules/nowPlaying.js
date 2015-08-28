@@ -39,17 +39,21 @@ function update() {
             var rss = result.lfm || {};
             var channel = rss.recenttracks || {};
             var items = channel.track || [];
-            var nowPlaying = items[0] || {name:'?'};
-            var lastPlayed = items[1] || {name:'?'};
-            var doublePrev = items[2] || {name:'?'};
+            var nowPlaying = items[0] || {name:'?', artist:{_text:'?'}};
+            var lastPlayed = items[1] || {name:'?', artist:{_text:'?'}};
+            var doublePrev = items[2] || {name:'?', artist:{_text:'?'}};
 
-            var nowPlayingText = '{g}Now Playing: ' + nowPlaying.name + PADDING;
-            var lastPlayedText = '{o}Last Played: ' + lastPlayed.name + PADDING;
-            var doublePrevText = '{r}Double Prev: ' + doublePrev.name + PADDING;
+            // var nowPlayingText = '{g}Now Playing: ' + nowPlaying.artist._text + " - " + nowPlaying.name + PADDING;
+            // var lastPlayedText = '{o}Last Played: ' + lastPlayed.artist._text + " - " + lastPlayed.name + PADDING;
+            // var doublePrevText = '{r}Double Prev: ' + doublePrev.artist._text + " - " + doublePrev.name + PADDING;
 
-            console.log(nowPlayingText + '\n');
-            console.log(lastPlayedText + '\n');
-            console.log(doublePrevText + '\n');
+            var nowPlayingText = '{g}Recently Played: ' + nowPlaying.artist._text + " - " + nowPlaying.name + PADDING;
+            var lastPlayedText = '{o}Less Recently 1: ' + lastPlayed.artist._text + " - " + lastPlayed.name + PADDING;
+            var doublePrevText = '{r}Less Recently 2: ' + doublePrev.artist._text + " - " + doublePrev.name + PADDING;
+
+            // console.log(nowPlayingText + '\n');
+            // console.log(lastPlayedText + '\n');
+            // console.log(doublePrevText + '\n');
 
             options.path = '/peggy/write?board=1&x=1&y=9&text=' + encodeURIComponent(nowPlayingText);
             http.get(options).on('error', function (e) {
