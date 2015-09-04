@@ -43,13 +43,13 @@ function update() {
             var lastPlayed = items[1] || {name:'?', artist:{_text:'?'}};
             var doublePrev = items[2] || {name:'?', artist:{_text:'?'}};
 
-            // var nowPlayingText = '{g}Now Playing: ' + nowPlaying.artist._text + " - " + nowPlaying.name + PADDING;
-            // var lastPlayedText = '{o}Last Played: ' + lastPlayed.artist._text + " - " + lastPlayed.name + PADDING;
-            // var doublePrevText = '{r}Double Prev: ' + doublePrev.artist._text + " - " + doublePrev.name + PADDING;
+            var nowPlayingText = '{g}Now Playing: ' + nowPlaying.artist._text + " - " + nowPlaying.name + PADDING;
+            var lastPlayedText = '{o}Last Played: ' + lastPlayed.artist._text + " - " + lastPlayed.name + PADDING;
+            var doublePrevText = '{r}Double Prev: ' + doublePrev.artist._text + " - " + doublePrev.name + PADDING;
 
-            var nowPlayingText = '{g}Recently Played: ' + nowPlaying.artist._text + " - " + nowPlaying.name + PADDING;
-            var lastPlayedText = '{o}Less Recently 1: ' + lastPlayed.artist._text + " - " + lastPlayed.name + PADDING;
-            var doublePrevText = '{r}Less Recently 2: ' + doublePrev.artist._text + " - " + doublePrev.name + PADDING;
+            // var nowPlayingText = '{g}Recently Played: ' + nowPlaying.artist._text + " - " + nowPlaying.name + PADDING;
+            // var lastPlayedText = '{o}Less Recently 1: ' + lastPlayed.artist._text + " - " + lastPlayed.name + PADDING;
+            // var doublePrevText = '{r}Less Recently 2: ' + doublePrev.artist._text + " - " + doublePrev.name + PADDING;
 
             // console.log(nowPlayingText + '\n');
             // console.log(lastPlayedText + '\n');
