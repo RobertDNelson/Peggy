@@ -47,7 +47,7 @@ function simpleLogError(e) {
     console.log('Got error: ' + e.message);
 }
 
-function getWeather() {
+function updateTime() {
 
     var formattedDate = 'Unknown';
     try {
@@ -57,18 +57,33 @@ function getWeather() {
     }
 
     writeCell(1, 0, formattedDate + PADDING);
+}
 
-    request('http://w1.weather.gov/xml/current_obs/KMSP.xml', function (err, resp, body) {
+function getWeather() {
+
+    var opts = {
+        url: 'http://w1.weather.gov/xml/current_obs/KMSP.xml',
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.245'
+        }
+    };
+
+    request(opts, function (err, resp, body) {
 
         if (err) {
             console.log('Failed request to get weather: ' + err);
             return;
         }
 
+        // remove any XML directives
+        // body = body.replace(/\<\?xml.*?\?\>/gi, "");
+
         digester.digest(body, function (err, result) {
 
             if (err) {
                 console.log('Failed to parse XML: ' + err);
+                // console.log('Full XML:');
+                // console.log(body);
                 return;
             }
 
@@ -307,7 +322,9 @@ function clearLines() {
     }
 }
 
+updateTime();
 initDrawWeather();
 getWeather();
-setInterval(getWeather, 60 * 1000);
-setInterval(drawWeather, 1000);
+setInterval(updateTime, 10 * 1000); // 10 seconds
+setInterval(getWeather, 15 * 60 * 1000); // 15 minutes
+setInterval(drawWeather, 1000); // 1 second
