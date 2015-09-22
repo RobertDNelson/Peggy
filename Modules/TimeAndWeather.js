@@ -25,6 +25,7 @@ var COLORS = [
 var wterms = {
     "rain": wtypes.RAINY,
     "hail": wtypes.RAINY,
+    "drizzle": wtypes.RAINY,
     "snow": wtypes.SNOWY,
     "sleet": wtypes.SNOWY,
     "overcast": wtypes.CLOUDY,
