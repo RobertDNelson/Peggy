@@ -4,7 +4,7 @@ var google = require('googleapis');
 var calendar = google.calendar('v3');
 
 var defaultParams = {
-  calendarId: 'cocomsp.com_qhpaqd48qabnbg034ghh0c5vs4@group.calendar.google.com',
+  calendarId: 'explorecoco.com_mjo4fpfd0f53vt5nemrci5nuj4@group.calendar.google.com',
   orderBy: 'startTime',
   singleEvents: true,
   maxResults: 11,
@@ -24,7 +24,7 @@ function update() {
   calendar.events.list(p,function (err, response) {
     if(!err) {
       var rows = [];
-      rows[0] = "{o} ************** CoCo Events ***************************************************";
+      rows[0] = "{o} ************** COCO Events ***************************************************";
 
       var events = response.items;
 
