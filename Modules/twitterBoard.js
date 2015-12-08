@@ -25,7 +25,14 @@ function update() {
 
   var searchTerm = process.env['twitterSearchTerm'] || "@exploreCOCO";
 
-  twit.search(searchTerm, function(data) {
+  twit.get('search/tweets', {q: searchTerm}, function(error, data, response) {
+
+    if (error) {
+      console.log("Twitter error received:");
+      console.log(error);
+      return;
+    }
+
     var curRowNum = 1;
     var maxRows = 12;
     var maxCharsPerRow = 80;
