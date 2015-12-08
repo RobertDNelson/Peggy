@@ -1,6 +1,7 @@
 ﻿var request = require('request');
 var http = require('http');
 var xml_digester = require("xml-digester");
+xml_digester._logger.level(xml_digester._logger.WARN_LEVEL); // stop showing INFO log entries
 var digester = xml_digester.XmlDigester({});
 require("date-format-lite");
 
