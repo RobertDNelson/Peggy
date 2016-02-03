@@ -9,7 +9,7 @@ There are two routes to the API. They respond to any HTTP verb. All example quer
 	/peggy/write/
 	e.g. /peggy/write?board=1&x=0&y0&text=hello%20world
 ```
-To change the colors in the text add either {r} for red {o} for orange or {g} for green. All subsequent characters will be that color. You can use multiple colors in the the text param. E.g. "{o}Hello {r}World{g}!" will have "Hello" in red "World" in Orange and "!" in green.
+To change the colors in the text add either {r} for red {o} for orange or {g} for green. All subsequent characters will be that color. You can use multiple colors in the the text param. E.g. "{o}Hello {r}World{g}!" will have "Hello" in orange "World" in red and "!" in green.
 
 ```
 	/peggy/clear
