@@ -28,6 +28,12 @@ module.exports = function () {
         '6': { 'cols': 80, 'rows': 10, 'right': -1, 'below': -1, 'port': BOARD_PORT_MINI, 'ip': BOARD_IP_MINI },
       };
 
+    var GREEN = String.fromCharCode(29),
+        RED = String.fromCharCode(30),
+        ORANGE = String.fromCharCode(31),
+        BSTOP = String.fromCharCode(28),
+        BLINK = String.fromCharCode(7);
+
     var allowWrites = true;
 
 
@@ -65,10 +71,20 @@ module.exports = function () {
           message = message.substr(0,r.index)+String.fromCharCode(n)+message.substr(r.index+r[0].length)
         }
       }
+      // replace blinking codes
+      message = message.replace(/\{b\}/g, BLINK); // Start Blinking (ON/OFF)
+      message = message.replace(/\{bs\}/g, BSTOP); // Stop Blinking
+      // replace 2-color blinking codes
+      message = message.replace(/\{bor\}/g, ORANGE + BLINK + BLINK + RED); // Orange + Red
+      message = message.replace(/\{bgr\}/g, GREEN + BLINK + BLINK + RED); // Green + Red
+      message = message.replace(/\{bro\}/g, BLINK + BLINK + ORANGE + RED); // Red + Orange
+      message = message.replace(/\{bgo\}/g, BLINK + BLINK + ORANGE + GREEN); // Green + Orange
+      message = message.replace(/\{brg\}/g, RED + BLINK + BLINK + GREEN); // Red + Green
+      message = message.replace(/\{bog\}/g, ORANGE + BLINK + BLINK + GREEN); // Orange + Green
       // replace color codes
-      message = message.replace(/\{g\}/g, String.fromCharCode(29)); // Green
-      message = message.replace(/\{r\}/g, String.fromCharCode(30)); // Red
-      message = message.replace(/\{o\}/g, String.fromCharCode(31)); // Orange
+      message = message.replace(/\{g\}/g, GREEN); // Green
+      message = message.replace(/\{r\}/g, RED); // Red
+      message = message.replace(/\{o\}/g, ORANGE); // Orange
       return message;
     }
 
