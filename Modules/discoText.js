@@ -1,6 +1,6 @@
 var http = require('http');
 
-var colors = ['{bor}', '{bgr}', '{bro}', '{bgo}', '{brg}', '{bog}'];
+var colors = ['{bor}', '{brg}', '{bgo}'];
 
 var board = {id: 1, 'cols': 80, 'rows': 12, discoRow: 4, discoCol: 5};
 
@@ -21,7 +21,7 @@ function drawLine() {
   if (text && text.length > 0) {
     var out = repeatString(" ", board.discoCol);
     for (var i=0; i<text.length; i++) {
-      var randomColor = colors[Math.floor(Math.random() * (6))];
+      var randomColor = colors[Math.floor(Math.random() * (3))];
       out += randomColor + text.substring(i, i + 1);
     }
     out += repeatString(" ", board.cols - text.length - board.discoCol);
