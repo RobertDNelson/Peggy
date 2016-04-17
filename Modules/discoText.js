@@ -1,6 +1,6 @@
 var http = require('http');
 
-var colors = ['{bor}', '{bgr}', '{bro}', '{brg}', '{bgo}', '{bog}'];
+var colors = ['{bor}', '{bgr}', '{bro}', '{brg}', '{bgo}', '{bog}', '{g}{b}', '{r}{b}', '{o}{b}'];
 
 var board = {id: 1, 'cols': 80, 'rows': 12, discoRow: 4, discoCol: 5};
 
@@ -21,7 +21,7 @@ function drawLine() {
   if (text && text.length > 0) {
     var out = repeatString(" ", board.discoCol);
     for (var i=0; i<text.length; i++) {
-      var randomColor = colors[Math.floor(Math.random() * (6))];
+      var randomColor = colors[Math.floor(Math.random() * (9))];
       out += randomColor + text.substring(i, i + 1);
     }
     out += repeatString(" ", board.cols - text.length - board.discoCol);
@@ -46,7 +46,7 @@ function update() {
       randomChar = text.substring(randomSlot, randomSlot + 1);
     }
 
-    var randomColor = colors[Math.floor(Math.random() * (6))];
+    var randomColor = colors[Math.floor(Math.random() * (9))];
 
     writeCell(randomSlot + board.discoCol, board.discoRow, randomColor + randomChar);
   }
