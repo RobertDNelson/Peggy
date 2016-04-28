@@ -2,6 +2,7 @@ var net = require('net');
 var bufferpack = require('bufferpack');
 var sleep = require('sleep');
 var MessageRequest = require('../models/message_request.js');
+var RawRequest = require('../models/raw_request.js');
 
 module.exports = function () {
   var Board;
@@ -32,9 +33,11 @@ module.exports = function () {
         RED = String.fromCharCode(30),
         ORANGE = String.fromCharCode(31),
         BSTOP = String.fromCharCode(28),
-        BLINK = String.fromCharCode(7);
+        BLINK = String.fromCharCode(7),
+        FILL = String.fromCharCode(127);
 
-    var allowWrites = true;
+    var allowWrites = true,
+        isBlanked = false;
 
 
     TOP_BOARD_SOCKET.on('connect', function(){
@@ -47,7 +50,7 @@ module.exports = function () {
     });
 
     BOTTOM_BOARD_SOCKET.on('connect', function() {
-      console.log('Bottom Board Conencted');
+      console.log('Bottom Board Connected');
       setTimeout(writeBottomBoard, 50);
     })
 
@@ -62,15 +65,6 @@ module.exports = function () {
      * @returns {String} The properly formated string
      */
     function replaceColorPlaceholders(message) {
-      // replace char codes
-      var r = true;
-      while (r) {
-        r = /\{\#[0-9]+\}/g.exec(message);
-        if (r) {
-          var n = parseInt(r[0].substring(2,r[0].length-1));
-          message = message.substr(0,r.index)+String.fromCharCode(n)+message.substr(r.index+r[0].length)
-        }
-      }
       // replace blinking codes
       message = message.replace(/\{b\}/g, BLINK); // Start Blinking (ON/OFF)
       message = message.replace(/\{bs\}/g, BSTOP); // Stop Blinking
@@ -85,6 +79,24 @@ module.exports = function () {
       message = message.replace(/\{g\}/g, GREEN); // Green
       message = message.replace(/\{r\}/g, RED); // Red
       message = message.replace(/\{o\}/g, ORANGE); // Orange
+      // replace the fill code
+      message = message.replace(/\{f\}/g, FILL); // Fill: all pixels in a rectangle
+      return message;
+    }
+
+    /**
+     * Replaces arbitrary char codes with the actual ASCII character. Use {#nn} where nn is the decimal (not hex) index of the ASCII character.
+     */
+    function replaceCharCodes(message) {
+      // replace char codes
+      var r = true;
+      while (r) {
+        r = /\{\#[0-9]+\}/g.exec(message);
+        if (r) {
+          var n = parseInt(r[0].substring(2,r[0].length-1));
+          message = message.substr(0,r.index)+String.fromCharCode(n)+message.substr(r.index+r[0].length)
+        }
+      }
       return message;
     }
 
@@ -114,6 +126,14 @@ module.exports = function () {
      * @returns {Buffer} a data buffer for writing to the socket
      */
     function generateBuffer(message) {
+      if (message instanceof MessageRequest)
+        return generateMessageBuffer(message);
+      if (message instanceof RawRequest)
+        return generateRawBuffer(message);
+      return null;
+    }
+
+    function generateMessageBuffer(message) {
         var row = message.y;
         var col = message.x;
         var text = escapeCharacters(replaceColorPlaceholders(message.text));
@@ -125,6 +145,14 @@ module.exports = function () {
         buffer.write(text,4, buffer.length-4, 'ascii');
         buffer.writeUInt8(0x04,4+text.length);
         return buffer;
+    }
+
+    function generateRawBuffer(message) {
+      var data = replaceColorPlaceholders(replaceCharCodes(message.rawString));
+      // console.log("Sending raw message (" + data.length + " bytes) based on: " + message.rawString + "");
+      var buffer = new Buffer(data.length);
+      buffer.write(data, 0, buffer.length, 'ascii');
+      return buffer;
     }
 
 
@@ -195,20 +223,25 @@ module.exports = function () {
         topBoardQueue = [];
         bottomBoardQueue = [];
         for (var i = 5; i >= 0; i--) {
-          this.clear(i);
+          var req = new RawRequest(i, "{#1}{#" + (32+i) + "}{#127}{#40}{#4}");
+          this.write(req);
         }
         allowWrites = true;
+        isBlanked = false;
       },
       turnOff: function() {
         topBoardQueue = [];
         bottomBoardQueue = [];
         for (var i = 5; i >= 0; i--) {
-          this.clear(i);
+          var req = new RawRequest(i, "{#1}{#" + (32+i) + "}{#127}{#47}{#4}");
+          this.write(req);
         }
-        allowWrites = false;
+        // allowWrites = false;
+        isBlanked = true;
       },
       isOn: function() {
-        return allowWrites;
+        // return allowWrites;
+        return !isBlanked;
       }
     }
   }();

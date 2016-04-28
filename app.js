@@ -8,6 +8,8 @@ if (process.argv.indexOf('live') >= 0) {
 	board = require('./Outputters/DevBoard.js');
 }
 var MessageRequest = require('./models/message_request.js');
+var RawRequest = require('./models/raw_request.js');
+
 var express = require('express');
 var api = express();
 var fork = require('child_process').fork;
@@ -21,6 +23,7 @@ api.use(express.static('public'));
 board.connect();
 
 // reset the board
+board.turnOn();
 for (var i = 5; i >= 0; i--) {
 	board.clear(i);
 };
@@ -123,6 +126,18 @@ api.all('/peggy/discoText', function(req, res) {
 
 api.all('/peggy/discoText/off', function(req, res) {
 	modules['discoText.js'].send({ text: '' });
+	res.send(200);
+	res.end();
+});
+
+api.all('/peggy/raw', function(req, res) {
+	if (!req.query.board || !req.query.board > 5 || !req.query.text) {
+		res.send(500, {error:'invalid request'});
+		return;
+	}
+	var boardNumber = parseInt(req.query.board);
+	var req = new RawRequest(boardNumber, req.query.text);
+	board.write(req);
 	res.send(200);
 	res.end();
 });
