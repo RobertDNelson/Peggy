@@ -8,11 +8,11 @@ module.exports = function () {
   var Board;
 
   Board = function () {
-    var BOARD_IP = "10.105.4.250",
+    var BOARD_IP = "10.1.100.5",
       BOARD_PORT = 25,
       BOARD_PORT_TOP = 26,
       BOARD_PORT_BOTTOM = 27,
-      BOARD_IP_MINI = "10.105.4.252",
+      BOARD_IP_MINI = "10.1.100.6",
       BOARD_PORT_MINI = 26,
       MINI_SOCKET = new net.Socket('tcp4'),
       TOP_BOARD_SOCKET = new net.Socket('tcp4');
