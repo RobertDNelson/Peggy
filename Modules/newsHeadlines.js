@@ -1,8 +1,5 @@
 var request = require('request');
 var http = require('http');
-//var xml_digester = require("xml-digester");
-//xml_digester._logger.level(xml_digester._logger.WARN_LEVEL); // stop showing INFO log entries
-//var digester = xml_digester.XmlDigester({});
 
 function update() {
 
@@ -20,87 +17,55 @@ function update() {
     };
 
     http.get(options, function (res) {
+        getNewsFeed();
     }).on('error', function (e) {
         console.log("Got error: " + e.message);
     });
 
-    y++;
+}
 
-    var newsFeedUrl = 'http://feeds.reuters.com/reuters/technologyNews?format=xml';
-    request(newsFeedUrl, function (err, resp, body) {
+function getNewsFeed() {
+  var opts = {
+        url: 'https://newsapi.org/v1/articles?source=ars-technica&sortBy=latest&apiKey=9e4b535f632b4086bdaa9b3617f3eac4',
+    };
 
-        if (!err && resp.statusCode == 200) {
-            try {
-                // Headlines are all between <title> tags.
-                var parser = new DOMParser();
-                xmlDoc = parser.parseFromString(body,"text/xml");
-
-                
-                var matches = xmlDoc.getElementsByTagName("title");
-
-                var matches = JSON.parse(body);
-
-                for (var i = 0; i < matches.length; i++) {
-                    var match = matches[i];
-
-                    var title = math.childNodes[0].nodeValue;
-                    
-
-                   
-                    console.log(matchString);
-
-                    var options = {
-                        host: host,
-                        port: 80,
-                        //port: 8080,
-                        path: '/peggy/write?board=0&x=3&y=' + y + '&text=' + encodeURIComponent(matchString) + "                    ",
-                        agent: false
-                    };
-
-                    http.get(options, function (res) {
-
-                    }).on('error', function (e) {
-                        console.log("Got error: " + e.message);
-                    });
-
-                    y = y + 1;
-
-                    if(i == 3) break;
-                }
-
-            } catch (error) {
-                var options = {
-                    host: host,
-                    port: 80,
-                    //port: 8080,
-                    path: '/peggy/write?board=0&x=3&y=' + y + '&text=' + encodeURIComponent(error.message) + "                    ",
-                    agent: false
-                };
-
-                http.get(options, function (res) {
-
-                }).on('error', function (e) {
-                    console.log("Got error: " + e.message);
-                });
-            }
-        }
-        else {
-            var options = {
-                host: host,
-                port: 80,
-                //port: 8080,
-                path: '/peggy/write?board=0&x=3&y=' + y + '&text=' + encodeURIComponent(err) + "                    ",
-                agent: false
-            };
-
-            http.get(options, function (res) {
-
-            }).on('error', function (e) {
-                console.log("Got error: " + e.message);
-            });
-        }
+    request(opts, function (err, resp, body) {
+        writtenLines = 0;
+        // Headlines are all between <title> tags.
+        news = JSON.parse(body);
+        setTimeout(writeNewsLine, 3000);
     });
 }
 
-// update();
+var news;
+var writtenLines = 0;
+function writeNewsLine(){
+    var article = news.articles.shift();
+    var headline = article.title;
+    console.log("Writing headline: " + headline);
+    var options = {
+        host: 'localhost',
+        port: 80,
+        //port: 8080,
+        path: '/peggy/write?board=0&x=0&y=' + (writtenLines+2) + '&text=' + encodeURIComponent(headline),
+        agent: false
+    };
+
+    http.get(options, function (res) {
+        writtenLines++;
+        if(writtenLines < 3){
+            setTimeout(function() {
+                writeNewsLine(title);
+            }, 1000);
+        }
+    }).on('error', function (e) {
+        console.log("Got error: " + e.message);
+    });
+
+    
+}
+
+
+getNewsFeed();
+//update();
 // setInterval(update, 1 * 60 * 1000);
