@@ -6,26 +6,26 @@ var currentFeedIndex = 0;
 var pad = '                                                                             ';
 var news;
 var writtenLines = 0;
+var clearedLines = 0;
 function update() {
     writtenLines = 0;
     var titleText = ('{r}TOP STORIES: ' + newsFeeds[currentFeedIndex].name + pad).substring(0, pad.length);
     
-    request({url:'http://10.1.100.4/peggy/clear?board=0'},function(err,resp,body){
-        setTimeout(function(){
-            // display title
-            var options = {
-                host: host,
-                port: 80,
-                //port: 8080,
-                path: '/peggy/write?board=0&x=0&y='+startLine+'&text=' + encodeURIComponent(titleText),
-                agent: false
-            };
-            http.get(options, function (res) {
-                writtenLines++;
-                getNewsFeed();
-            });
-        },100)
-    });
+    setTimeout(function(){
+        // display title
+        var options = {
+            host: host,
+            port: 80,
+            //port: 8080,
+            path: '/peggy/write?board=0&x=0&y='+startLine+'&text=' + encodeURIComponent(titleText),
+            agent: false
+        };
+        http.get(options, function (res) {
+            writtenLines++;
+            getNewsFeed();
+        });
+    },100)
+    
 }
 
 function getNewsFeed() {
@@ -43,8 +43,6 @@ function getNewsFeed() {
     if(currentFeedIndex >= newsFeeds.length)
         currentFeedIndex = 0;
 }
-
-
 
 function writeNewsLine(){
     try{
