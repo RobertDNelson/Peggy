@@ -66,6 +66,6 @@ function writeNewsLine(){
 }
 
 
-getNewsFeed();
-//update();
-// setInterval(update, 1 * 60 * 1000);
+//getNewsFeed();
+update();
+setInterval(update, 1 * 60 * 1000);
