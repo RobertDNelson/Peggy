@@ -1,6 +1,6 @@
 {
-  "name": "CoCo_Minneapolis_LiteBright",
-  "version": "0.0.1",
+  "name": "Fueled_Collective_Minneapolis_LiteBright",
+  "version": "0.0.2",
   "dependencies": {
     "bufferpack": "*",
     "date-format-lite": "0.5.x",
