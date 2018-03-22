@@ -23,7 +23,7 @@ process.on('message', function(search) {
 
 function update() {
 
-  var searchTerm = process.env['twitterSearchTerm'] || "@exploreCOCO";
+  var searchTerm = process.env['twitterSearchTerm'] || "@fueledcomn";
 
   twit.get('search/tweets', {q: searchTerm}, function(error, data, response) {
 
