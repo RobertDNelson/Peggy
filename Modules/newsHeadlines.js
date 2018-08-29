@@ -104,5 +104,5 @@ function update() {
 }];
 // Kick off the first update process
 update();
-// Continuously update every 30 seconds
-setInterval(update, 1 * 30 * 1000);
+// Continuously update every 60 seconds
+setInterval(update, 1 * 60 * 1000);
