@@ -36,7 +36,7 @@ var wterms = {
 var weather_clear = false,
     weather_type = wtypes.NONE;
 
-var board = { id: 5, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
+var board = { id: 4, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
 
 var pix = [];
 var pcolor = [];
