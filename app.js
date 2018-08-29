@@ -4,6 +4,7 @@ if (process.argv.indexOf('live') >= 0) {
 	console.log("Yep, this is LIVE.");
 	board = require('./Outputters/Board.js');
 } else {
+	debugger;
 	console.log("Starting up in DEV mode.");
 	board = require('./Outputters/DevBoard.js');
 }
@@ -24,9 +25,6 @@ board.connect();
 
 // reset the board
 board.turnOn();
-for (var i = 5; i >= 0; i--) {
-	board.clear(i);
-};
 
 // API
 api.all('/peggy/write', function (req, res) {
