@@ -145,7 +145,6 @@ api.listen(8080);
 fs.readdir('./Modules', function(err, files) {
 	files.forEach(function(file, index, array) {
 		if (file.match(/\.js$/)) {
-			if(file != 'newsHeadlines.js')
 			modules[file] = fork('./Modules/' + file, []);
 		}
 	});

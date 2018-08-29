@@ -128,7 +128,6 @@ module.exports = function () {
         };
       },
       turnOn: function() {
-		debugger;
         for (var i = 5; i >= 0; i--) {
           this.clear(i);
         }
