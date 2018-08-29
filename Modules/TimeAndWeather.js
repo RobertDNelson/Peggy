@@ -1,4 +1,5 @@
 var request = require('request');
+var stripTags = require('striptags');
 var http = require('http');
 var xml_digester = require('xml-digester');
 xml_digester._logger.level(xml_digester._logger.WARN_LEVEL); // stop showing INFO log entries
@@ -6,7 +7,7 @@ var digester = xml_digester.XmlDigester({});
 require('date-format-lite');
 
 var options = {
-    host: '10.1.100.4',
+    host: 'localhost',
     port: 8080,
     agent: false
 };
@@ -35,14 +36,14 @@ var wterms = {
 var weather_clear = false,
     weather_type = wtypes.NONE;
 
-var board = { id: 4, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
+var board = { id: 5, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
 
 var pix = [];
 var pcolor = [];
 var x;
 var sunBlink = 1;
 
-var PADDING = '                    ';
+var PADDING = '                              ';
 
 function simpleLogError(e) {
     e = e || {};
@@ -74,6 +75,7 @@ function getForecast() {
             console.log('Failed request to get weather: ' + err);
             return;
         }
+		/* This gets detailed forecasts.  Too much for the small board, but leaving to not lose the work.
 		var detailedForecastBodyStart = body.indexOf('id="detailed-forecast-body">') + 28;
 		var detailedForecastBodyEnd = body.indexOf('<!-- /Detailed Forecast -->');
 		var detailedForecastBody = body.substring(detailedForecastBodyStart,detailedForecastBodyEnd);
@@ -86,19 +88,60 @@ function getForecast() {
 		// Need to wrap the forecast.
 		var forecast2 = '';
 		var forecast3 = '';
-		if(forecast.length > 31){
-			forecast2 = forecast.substring(32,forecast.length);
+		if(forecast.length > board.cols){
+			forecast2 = forecast.substring(board.cols,forecast.length);
 		}
-		if(forecast2.length > 31){
-			forecast3 = forecast2.substring(32,forecast2.length);
+		if(forecast2.length > board.cols){
+			forecast3 = forecast2.substring(board.cols,forecast2.length);
 		}
-
-
+		
 		// update the board
+		//writeCell(0, 9, nextForecastTime + ':' + PADDING);
+		//writeCell(0, 10, forecast + PADDING);
+		//writeCell(0, 11, forecast2 + PADDING);
+		*/
+		
+		// Short forecasts.  We are scraping from HTML so this is messy, but seems to work.  
+		
+		// Find the start of the <ul> that has all the forecast data in it.
+		var sevenDayForecastStart = body.indexOf('<ul id="seven-day-forecast-list" class="list-unstyled">') + 57;
+		var sevenDayForecastBody = body.substring(sevenDayForecastStart,body.length);
+		var sevenDayForecastEnd = sevenDayForecastBody.indexOf('</ul>');
+		
+		sevenDayForecastBody = sevenDayForecastBody.substring(0,sevenDayForecastEnd);
+		// Each forecast blurb is in a 'tombstone-container' element pretty predictably.
+		var forecasts = sevenDayForecastBody.split('<div class="tombstone-container">');
+		// The row we want to start printing forecasts for.
+		var row = 4;
+		// Go through each of our forecasts and 
+		for(var i=0;i<forecasts.length;i++){
+		 var forecast = forecasts[i];
+		 // Find the period of the forecast - 'Today', 'Sunday' Tonight, etc.
+		 var periodStart = forecast.indexOf('<p class="period-name">') + 23;
+		 var periodEnd = forecast.indexOf('</p>');
+		 if(periodEnd== -1) continue; // This happens if there is garbage at the start of our parsing.
+		 var period = forecast.substring(periodStart,periodEnd);
+		 period = stripTags(period,[],' ').trim();
+		 
+		 // Only want full day forecasts, throw out the evening forecasts.
+		 if(period.indexOf('Night') != -1) continue;
+		 var tempStart = forecast.indexOf('<p class="short-desc">') + 22;// Have to make this pretty: Partly Sunny</p><p class="temp temp-high">High: 72 &deg;F</p>
+		 // Cut off the html code for degrees F
+		 var tempEnd = forecast.indexOf('&deg;F</p>');
+		 var temp = forecast.substring(tempStart,tempEnd);
+		 // Get rid of the 'high' and 'low' labels to save space.
+		 temp = temp.replace('High: ','');
+		 temp = temp.replace('Low: ','');
+		 // Re-add the label we threw out a few lines ago.
+		 temp = temp.trim() + 'F';
+		 // get rid of HTML tags and extra spaces.
+		 temp = stripTags(temp,[],' ');
+		 temp = temp.replace('  ',' ');
+		 writeCell(0,row,'{r}' + period + ' {g}' + temp);
+		 row++;
+		}
 
-		writeCell(0, 9, nextForecastTime + ':' + PADDING);
-		writeCell(0, 10, forecast + PADDING);
-		writeCell(0, 11, forecast2 + PADDING);
+
         
     });
 }
@@ -135,8 +178,17 @@ function getWeather() {
             var observation = result.current_observation || {};
             var weather = observation.weather || {};
             var temperature = observation.temperature_string || '';
+			// Remove celcius and tenths from the temp to save space and remove info people likely aren't using.
+			var tempDecimalStart = temperature.indexOf('.');
+			if(tempDecimalStart > 0){
+				temperature = temperature.substring(0,tempDecimalStart) + 'F';
+			}
             var wind = observation.wind_string || '';
-
+			// Remove the wind speed in knots; it doesn't fit on the board and no one cares.
+			var knotsStart = wind.indexOf(' (');
+			if(knotsStart > 0){
+				wind = wind.substring(0,knotsStart);
+			}
             // update the weather type
 
             var wt = wtypes.SUNNY, wlc = weather.toLowerCase();
@@ -152,9 +204,9 @@ function getWeather() {
 
             // update the board
 
-            writeCell(3, 1, weather + PADDING);
-            writeCell(3, 2, temperature + PADDING);
-            writeCell(3, 3, 'Wind: ' + wind + PADDING);
+            writeCell(3, 1,  weather + ' ' + temperature +PADDING);
+            writeCell(3, 2, 'Wind: ' + wind + PADDING);
+			writeCell(0, 3, PADDING);
         });
     });
 }
@@ -373,4 +425,5 @@ getForecast();
 setInterval(updateTime, 10 * 1000); // 10 seconds
 setInterval(getWeather, 1000 * 60 * 15); // 15 minutes
 setInterval(getForecast, 1000 * 60 * 15); // 15 minutes
+// Replacing this space wih getForecast to get upcoming weather.
 //setInterval(drawWeather, 1000); // 1 second
