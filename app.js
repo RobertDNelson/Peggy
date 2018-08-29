@@ -4,7 +4,6 @@ if (process.argv.indexOf('live') >= 0) {
 	console.log("Yep, this is LIVE.");
 	board = require('./Outputters/Board.js');
 } else {
-	debugger;
 	console.log("Starting up in DEV mode.");
 	board = require('./Outputters/DevBoard.js');
 }
@@ -146,6 +145,7 @@ api.listen(8080);
 fs.readdir('./Modules', function(err, files) {
 	files.forEach(function(file, index, array) {
 		if (file.match(/\.js$/)) {
+			if(file != 'newsHeadlines.js')
 			modules[file] = fork('./Modules/' + file, []);
 		}
 	});
