@@ -6,7 +6,7 @@ var digester = xml_digester.XmlDigester({});
 require('date-format-lite');
 
 var options = {
-    host: 'localhost',
+    host: '10.1.100.4',
     port: 8080,
     agent: false
 };
@@ -60,6 +60,48 @@ function updateTime() {
 
     writeCell(1, 0, formattedDate + PADDING);
 }
+function getForecast() {
+	var opts = {
+        url: 'https://forecast.weather.gov/MapClick.php?lat=44.979&lon=-93.2649',
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.245'
+        }
+    };
+	
+	request(opts, function (err, resp, body) {
+		
+        if (err) {
+            console.log('Failed request to get weather: ' + err);
+            return;
+        }
+		var detailedForecastBodyStart = body.indexOf('id="detailed-forecast-body">') + 28;
+		var detailedForecastBodyEnd = body.indexOf('<!-- /Detailed Forecast -->');
+		var detailedForecastBody = body.substring(detailedForecastBodyStart,detailedForecastBodyEnd);
+		var nextForecastTimeStart = detailedForecastBody.indexOf('<div class="col-sm-2 forecast-label"><b>') + 40;
+		var nextForecastTimeEnd = detailedForecastBody.indexOf('</b>');
+		var nextForecastTime = detailedForecastBody.substring(nextForecastTimeStart,nextForecastTimeEnd);
+		var forecastStart = detailedForecastBody.indexOf('</b></div><div class="col-sm-10 forecast-text">') + 47;
+		var forecastEnd = detailedForecastBody.indexOf('</div></div><div class="row row-even row-forecast">');
+		var forecast = detailedForecastBody.substring(forecastStart,forecastEnd);
+		// Need to wrap the forecast.
+		var forecast2 = '';
+		var forecast3 = '';
+		if(forecast.length > 31){
+			forecast2 = forecast.substring(32,forecast.length);
+		}
+		if(forecast2.length > 31){
+			forecast3 = forecast2.substring(32,forecast2.length);
+		}
+
+
+		// update the board
+
+		writeCell(0, 9, nextForecastTime + ':' + PADDING);
+		writeCell(0, 10, forecast + PADDING);
+		writeCell(0, 11, forecast2 + PADDING);
+        
+    });
+}
 
 function getWeather() {
 
@@ -71,7 +113,7 @@ function getWeather() {
     };
 
     request(opts, function (err, resp, body) {
-
+		
         if (err) {
             console.log('Failed request to get weather: ' + err);
             return;
@@ -327,6 +369,8 @@ function clearLines() {
 updateTime();
 initDrawWeather();
 getWeather();
+getForecast();
 setInterval(updateTime, 10 * 1000); // 10 seconds
-setInterval(getWeather, 15 * 60 * 1000); // 15 minutes
-setInterval(drawWeather, 1000); // 1 second
+setInterval(getWeather, 1000 * 60 * 15); // 15 minutes
+setInterval(getForecast, 1000 * 60 * 15); // 15 minutes
+//setInterval(drawWeather, 1000); // 1 second
