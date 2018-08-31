@@ -211,10 +211,10 @@ function getWeather() {
             // weather_type = wtypes.SNOWY;
 
             // update the board
-			writeCell(0,0,'{r}********* Weather *****************************');
+			writeCell(0, 0,'{r}********* Weather *****************************');
             writeCell(0, 1,  weather + ' ' + temperature +PADDING);
             writeCell(0, 2, 'Wind: ' + wind + PADDING);
-			writeCell(0, 3, PADDING);
+			writeCell(0, 4, PADDING);
         });
     });
 }
