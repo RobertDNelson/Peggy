@@ -7,6 +7,8 @@ var pad = '                                                                     
 var news;
 var writtenLines = 0;
 var clearedLines = 0;
+// This is a work in progress, so this just immediately exits but lets us still keep it in the 'Modules' section 
+return;
 function update() {
     writtenLines = 0;
     var titleText = ('{r}TOP STORIES: ' + newsFeeds[currentFeedIndex].name + pad).substring(0, pad.length);
