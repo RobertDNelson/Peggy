@@ -5,7 +5,6 @@ var xml_digester = require('xml-digester');
 xml_digester._logger.level(xml_digester._logger.WARN_LEVEL); // stop showing INFO log entries
 var digester = xml_digester.XmlDigester({});
 require('date-format-lite');
-
 var options = {
     host: 'localhost',
     port: 8080,
@@ -36,7 +35,8 @@ var wterms = {
 var weather_clear = false,
     weather_type = wtypes.NONE;
 
-var board = { id: 4, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
+var board = { id: 5, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
+var animationBoard = { id: 4, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
 
 var pix = [];
 var pcolor = [];
@@ -58,8 +58,8 @@ function updateTime() {
     } catch (e) {
         console.log('Unable to format date: ' + e);
     }
-
-    writeCell(1, 0, formattedDate + PADDING);
+	
+    writeCell(1, 0, formattedDate + PADDING,animationBoard.id);
 }
 function getForecast() {
 	var opts = {
@@ -112,7 +112,7 @@ function getForecast() {
 		// Each forecast blurb is in a 'tombstone-container' element pretty predictably.
 		var forecasts = sevenDayForecastBody.split('<div class="tombstone-container">');
 		// The row we want to start printing forecasts for.
-		var row = 4;
+		var row = 5;
 		// Go through each of our forecasts and 
 		for(var i=0;i<forecasts.length;i++){
 		 var forecast = forecasts[i];
@@ -140,9 +140,15 @@ function getForecast() {
 		 writeCell(0,row,'{r}' + period + ' {g}' + temp);
 		 row++;
 		}
-
-
-        
+		
+		// Scrape the humidity.
+		var humidityStart = body.indexOf('<b>Humidity</b></td>') + 20;
+		var humidityBody = body.substring(humidityStart,body.length).trim();
+		var humidityEnd = humidityBody.indexOf('</td>'); // next </td> should be the end of the humidity value.
+		humidityBody = humidityBody.substring(0,humidityEnd);
+		humidityBody = stripTags(humidityBody);
+		writeCell(0,3,'Humidity: ' + humidityBody);
+		
     });
 }
 
@@ -178,19 +184,21 @@ function getWeather() {
             var observation = result.current_observation || {};
             var weather = observation.weather || {};
             var temperature = observation.temperature_string || '';
+			
 			// Remove celcius and tenths from the temp to save space and remove info people likely aren't using.
 			var tempDecimalStart = temperature.indexOf('.');
 			if(tempDecimalStart > 0){
 				temperature = temperature.substring(0,tempDecimalStart) + 'F';
 			}
+			
             var wind = observation.wind_string || '';
 			// Remove the wind speed in knots; it doesn't fit on the board and no one cares.
 			var knotsStart = wind.indexOf(' (');
 			if(knotsStart > 0){
 				wind = wind.substring(0,knotsStart);
 			}
+			
             // update the weather type
-
             var wt = wtypes.SUNNY, wlc = weather.toLowerCase();
             for (var w in wterms) {
                 if (wlc.indexOf(w) >= 0) {
@@ -203,9 +211,9 @@ function getWeather() {
             // weather_type = wtypes.SNOWY;
 
             // update the board
-
-            writeCell(3, 1,  weather + ' ' + temperature +PADDING);
-            writeCell(3, 2, 'Wind: ' + wind + PADDING);
+			writeCell(0,0,'{r}********* Weather *****************************');
+            writeCell(0, 1,  weather + ' ' + temperature +PADDING);
+            writeCell(0, 2, 'Wind: ' + wind + PADDING);
 			writeCell(0, 3, PADDING);
         });
     });
@@ -214,7 +222,7 @@ function getWeather() {
 function drawWeather() {
     if (weather_clear) {
         weather_clear = false;
-        clearLines();
+        clearAnimation();
     }
 
     switch (weather_type) {
@@ -249,7 +257,8 @@ function sunAndClouds() {
     function moveWriteCell(x, y, color, line) {
         if (pos < 0) line = line.substr(pos * -1);
         var msg = pad + color + line;
-        writeCell(x, y, msg);
+		
+        writeCell(x, y, msg,animationBoard.id);
     }
 
     if (sunBlink <= 1) {
@@ -288,8 +297,8 @@ function sunAndClouds() {
             ];
         }
 
-        for (var i=0, imax=writeLines.length; i<imax; i++) {
-            moveWriteCell(0, i+board.animStartRow, writeColor, writeLines[i]);
+        for (var i=0; i<writeLines.length; i++) {
+            moveWriteCell(0, i+animationBoard.animStartRow, writeColor, writeLines[i]);
         }
     }
 
@@ -300,10 +309,10 @@ function sunAndClouds() {
 function snowAndRain() {
     var clear = [];
     // move all current pix down by 1
-    for (x=0; x<board.cols; x++) {
+    for (x=0; x<animationBoard.cols; x++) {
         if (pix[x] >= 0) {
             pix[x]++;
-            if (pix[x] >= board.rows) {
+            if (pix[x] >= animationBoard.rows) {
                 pix[x] = -1;
                 clear[x] = true;
             }
@@ -315,7 +324,7 @@ function snowAndRain() {
         // find an open spot
         var col = getOpenCol();
         if (col >= 0) {
-            pix[col] = board.animStartRow;
+            pix[col] = animationBoard.animStartRow;
             pcolor[col] = getRandColor();
         }
     }
@@ -325,22 +334,20 @@ function snowAndRain() {
     var bRain = (weather_type == wtypes.RAINY);
 
     // draw all relevant rows
-    for (var y=board.animStartRow, yMax=board.animStartRow+board.animRowCount; y<yMax; y++) {
+    for (var y=animationBoard.animStartRow, yMax=animationBoard.animStartRow+animationBoard.animRowCount; y<yMax; y++) {
         if (pix.indexOf(y) || pix.indexOf(y-1)) {
             // we have SOMETHING to write here - pixel or space
             var line = "", write = false;
-            for (x=0; x<board.cols; x++) {
+            for (x=0; x<animationBoard.cols; x++) {
                 if (pix[x] == y+1) {
                     line += " ";
                     write = true;
                 } else if (pix[x] == y) {
                     line += pcolor[x] + cChar;
                     write = true;
-                    //writeCell(x, y, pcolor[x] + ".");
-                } else if (y == board.rows - 1 && clear[x]) {
+                } else if (y == animationBoard.rows - 1 && clear[x]) {
                     line += " ";
                     write = true;
-                    //writeCell(x, y, " ");
                     clear[x] = false;
                 } else {
                     line += " ";
@@ -348,38 +355,22 @@ function snowAndRain() {
             }
             if (write) {
                 // console.log("Write line " + y + ": \"" + line + "\"");
-                options.path = "/peggy/write?board=" + board.id + "&x=0&y=" + y + "&text=" + encodeURIComponent(line);
+                options.path = "/peggy/write?board=" + animationBoard.id + "&x=0&y=" + y + "&text=" + encodeURIComponent(line);
                 http.get(options).on('error', simpleLogError);
             }
         }
     }
-    // console.log("-");
-    // 
-    //options.path = "/peggy/write?board=" + board.id + "&x=0&y=0&text=" + getRandColor() + "********************************";
-    //http.get(options);
-}
-
-function initDrawWeather() {
-    // initialize the drawing cols
-    for (x=0; x<board.cols; x++) {
-        pix[x] = -1;
-        pcolor[x] = "";
-    }
-
-    // // draw the top line
-    // options.path = '/peggy/write?board=' + board.id + '&x=0&y=0&text=' + encodeURIComponent('{g}' + repeatString('*', board.cols));
-    // http.get(options).on('error', simpleLogError);
-
-    // clear the drawing board
-    clearLines();
 }
 
 function repeatString(str, num) {
     return new Array( num + 1 ).join( str );
 }
 
-function writeCell(x, y, msg) {
-    options.path = "/peggy/write?board=" + board.id + "&x=" + x + "&y=" + y + "&text=" + encodeURIComponent(msg);
+function writeCell(x, y, msg,boardId) {
+	if(boardId == null){
+		boardId = board.id
+	}
+    options.path = "/peggy/write?board=" + boardId + "&x=" + x + "&y=" + y + "&text=" + encodeURIComponent(msg);
     http.get(options).on('error', simpleLogError);
 }
 
@@ -410,20 +401,23 @@ function changeRange(inMin, inMax, value, outMin, outMax, bRound, bClip) {
     }
     return n;
 }
-
-function clearLines() {
-    var line = repeatString(" ", board.cols);
-    for (var y=board.animStartRow, yMax=board.animStartRow+board.animRowCount; y<yMax; y++) {
-        writeCell(0, y, line);
-    }
+function clearBoard(boardId){
+	 options.path = "/peggy/clear?board=" + boardId;
+    http.get(options).on('error', simpleLogError);
 }
 
+function clearAnimation() {
+    var line = repeatString(" ", animationBoard.cols);
+    for (var y=animationBoard.animStartRow, yMax=animationBoard.animStartRow+animationBoard.animRowCount; y<yMax; y++) {
+        writeCell(0, y, line,animationBoard.id);
+    }
+}
+clearBoard(4);
+clearBoard(5);
 updateTime();
-initDrawWeather();
 getWeather();
 getForecast();
 setInterval(updateTime, 10 * 1000); // 10 seconds
-setInterval(getWeather, 1000 * 60 * 15); // 15 minutes
-setInterval(getForecast, 1000 * 60 * 15); // 15 minutes
-// Replacing this space wih getForecast to get upcoming weather.
-//setInterval(drawWeather, 1000); // 1 second
+setInterval(getWeather, 1000 * 60 * 1); // 5 minutes
+setInterval(getForecast, 1000 * 60 * 1); // 5 minutes
+setInterval(drawWeather, 1000); // 1 second
