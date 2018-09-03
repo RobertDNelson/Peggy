@@ -16,32 +16,48 @@ var wtypes = {
     SUNNY: 1,
     SNOWY: 2,
     RAINY: 3,
-    CLOUDY: 4
+    CLOUDY: 4,
+    FOGGY: 5
+};
+var wseverity = {
+    LIGHT: 0,
+    NORMAL: 1,
+    SEVERE: 2
 };
 var COLORS = [
     "{g}",
     "{o}",
     "{r}"
 ];
-var wterms = {
-    "rain": wtypes.RAINY,
-    "hail": wtypes.RAINY,
-    "drizzle": wtypes.RAINY,
-    "snow": wtypes.SNOWY,
-    "sleet": wtypes.SNOWY,
-    "overcast": wtypes.CLOUDY,
-    "cloud": wtypes.CLOUDY
+var wterms = { // these are purposefully NOT grouped by type - the terms are searched in order, and precedence is by design
+    "rain": [wtypes.RAINY, wseverity.NORMAL],
+    "hail": [wtypes.RAINY, wseverity.NORMAL],
+    "drizzle": [wtypes.RAINY, wseverity.LIGHT],
+    "snow": [wtypes.SNOWY, wseverity.NORMAL],
+    "sleet": [wtypes.SNOWY, wseverity.NORMAL],
+    "overcast": [wtypes.CLOUDY, wseverity.SEVERE],
+    "mostly cloud": [wtypes.CLOUDY, wseverity.SEVERE],
+    "partly cloud": [wtypes.CLOUDY, wseverity.LIGHT],
+    "mostly sun": [wtypes.CLOUDY, wseverity.LIGHT],
+    "cloud": [wtypes.CLOUDY, wseverity.NORMAL],
+    "thunderstorm": [wtypes.RAINY, wseverity.SEVERE],
+    "fog": [wtypes.FOGGY, wseverity.NORMAL],
+    "fair": [wtypes.SUNNY, wseverity.NORMAL],
+    "sun": [wtypes.SUNNY, wseverity.NORMAL]
 };
 var weather_clear = false,
-    weather_type = wtypes.NONE;
+    weather_type = wtypes.NONE,
+    weather_severity = wtypes.NORMAL;
 
-var board = { id: 5, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
-var animationBoard = { id: 4, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 4, 'animRowCount': 8 };
+var board = { id: 5, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 1, 'animRowCount': 11 };
+var animationBoard = { id: 4, 'cols': 32, 'rows': 12, 'right': -1, 'below': -1, 'animStartRow': 1, 'animRowCount': 11 };
 
 var pix = [];
-var pcolor = [];
+var pixCols = [];
 var x;
 var sunBlink = 1;
+var cloudShift = 0;
+var fogDrawn = false;
 
 var PADDING = '                              ';
 
@@ -199,16 +215,21 @@ function getWeather() {
 			}
 			
             // update the weather type
-            var wt = wtypes.SUNNY, wlc = weather.toLowerCase();
+            var wt = wtypes.SUNNY, ws = wseverity.NORMAL, wlc = weather.toLowerCase();
             for (var w in wterms) {
                 if (wlc.indexOf(w) >= 0) {
-                    wt = wterms[w];
+                    wt = wterms[w][0];
+                    ws = wterms[w][1];
                     break;
                 }
             }
-            if (wt != weather_type) weather_clear = true;
+            if (wt != weather_type || ws != weather_severity) weather_clear = true;
             weather_type = wt;
-            // weather_type = wtypes.SNOWY;
+            weather_severity = ws;
+
+            // override
+            // weather_type = wtypes.RAINY;
+            // weather_severity = wseverity.LIGHT;
 
             // update the board
 			writeCell(0, 0,'{r}********* Weather *****************************');
@@ -228,9 +249,12 @@ function drawWeather() {
     switch (weather_type) {
         case wtypes.NONE:
             return;
+        case wtypes.FOGGY:
         case wtypes.CLOUDY:
+            clouds();
+            break;
         case wtypes.SUNNY:
-            sunAndClouds();
+            sun();
             break;
         case wtypes.RAINY:
         case wtypes.SNOWY:
@@ -239,7 +263,92 @@ function drawWeather() {
     }
 }
 
-function sunAndClouds() {
+function clouds() {
+    var desiredDuration = 32 // roughly every 5 minutes
+        shiftEveryN = Math.round(desiredDuration/board.cols),
+        fullDuration = shiftEveryN * board.cols;
+
+    if (cloudShift % shiftEveryN == 0) {
+        var writeLines, writeColor = '{g}'
+
+        if (weather_type == wtypes.FOGGY) {
+            writeLines = [
+                "   )   ,----------,      (      ",
+                "--`   (            )      `-----",
+                " ,-----(   (  )     )----,   ( )",
+                "(       (         )       )     ",
+                " (       `-------`  ( ),----,   ",
+                "  `-----`      (      (      )  ",
+                "--, )   (  ,----,     (  ( )  )-",
+                "   )     `(      )---' `-----`  ",
+                " )  )    (        )        (   (",
+                "   )      `------`    ( )   (   ",
+                "--` `------`   (             `--"
+            ];
+        } else if (weather_severity == wseverity.LIGHT) {
+            writeLines = [
+                "       ,----------,             ",
+                "      (            )            ",
+                "       (   (  )     )           ",
+                "        (         )             ",
+                "         `-------`              ",
+                "                                ",
+                "                                ",
+                "                                ",
+                "                                ",
+                "                                ",
+                "                                "
+            ];
+        } else if (weather_severity == wseverity.SEVERE) {
+            writeLines = [
+                "       ,----------,             ",
+                "      (            )            ",
+                " ,-----(   (  )     )----,      ",
+                "(       (         )       )     ",
+                " (       `-------`  ( ),----,   ",
+                "  `-----`      (      (      )  ",
+                "--,        ,----,     (  ( )  )-",
+                "   )      (      )---' `-----`  ",
+                " )  )    (        )        (   (",
+                "   )      `------`          (   ",
+                "--`                          `--"
+            ];
+        } else { // NORMAL
+            writeLines = [
+                "       ,----------,             ",
+                "      (            )            ",
+                " ,-----(   (  )     )           ",
+                "(       (         )             ",
+                " (       `-------`     ,----,   ",
+                "  `-----`             (      )  ",
+                "           ,----,     (  ( )  ) ",
+                "          (      )     `-----`  ",
+                "         (        )             ",
+                "          `------`              ",
+                "                                "
+            ];
+        }
+
+        var pos = changeRange(0, fullDuration, cloudShift, 0, board.cols, true, false);
+        // var pad = (pos > 0) ? repeatString(" ", pos) : "";
+        // console.log("clouds() pos = " + pos + ", cloudShift = " + cloudShift);
+
+        function moveWriteCell(x, y, color, line) {
+            if (pos < 0) pos += board.cols;
+            var msg = color + shiftWrapText(line, " ", pos, board.cols);
+            writeCell(x, y, msg, animationBoard.id);
+        }
+        
+        for (var i=0; i<writeLines.length; i++) {
+            moveWriteCell(0, i+animationBoard.animStartRow, writeColor, writeLines[i]);
+        }
+    }
+
+    cloudShift++;
+    if (cloudShift >= fullDuration) cloudShift = 0;
+}
+
+function sun() {
     // get sun position
     var d = new Date(),
         h = d.getHours() + (d.getMinutes() / 60);
@@ -268,28 +377,19 @@ function sunAndClouds() {
         var b7 = repeatString(String.fromCharCode(127), 7);
         var b5 = repeatString(String.fromCharCode(127), 5);
         var b3 = repeatString(String.fromCharCode(127), 3);
-        var writeLines, writeColor;
+        var writeLines, writeColor = '{o}';
 
-        if (weather_type == wtypes.CLOUDY) {
-            writeColor = '{g}';
+        if (sunBlink == 0) {
             writeLines = [
-                " ,----------,   ",
-                "(            )  ",
-                " (   (  )     ) ",
-                "  (         )   ",
-                "   `-------`    "
-            ];
-        } else if (sunBlink == 0) {
-            writeColor = '{o}';
-            writeLines = [
+                "    .    ",
                 "   "+b3+"   ",
                 "- " +b5+ " -",
                 "   "+b3+"   ",
                 "    .    "
             ];
         } else if (sunBlink == 1) {
-            writeColor = '{o}';
             writeLines = [
+                "         ",
                 "   "+b3+"    ",
                 "  " +b5+ "   ",
                 "   "+b3+"    ",
@@ -307,59 +407,92 @@ function sunAndClouds() {
 }
 
 function snowAndRain() {
-    var clear = [];
+    var grid = []; // 2-dimensional grid of current pix objects
+    var p, i;
+
+    // make sure grid has an entry for each row
+    for (i=0; i<animationBoard.rows; i++) {
+        grid[i] = [];
+    }
+
     // move all current pix down by 1
-    for (x=0; x<animationBoard.cols; x++) {
-        if (pix[x] >= 0) {
-            pix[x]++;
-            if (pix[x] >= animationBoard.rows) {
-                pix[x] = -1;
-                clear[x] = true;
-            }
+    for (i=0; i<pix.length; /* no increment*/) {
+        p = pix[i];
+        p.y++;
+        if (p.y >= animationBoard.rows) {
+            pix.splice(i,1);
+        } else { // we're drawing this one
+            grid[p.y][p.x] = p;
+            i++;
         }
+    }
+
+    // add threshold
+    var at = 0, num = 1;
+    if (weather_severity == wseverity.SEVERE) {
+        at = 0.8;
+        num = 10;
+    } else if (weather_severity == wseverity.LIGHT) {
+        at = 0.5;
+    } else { // NORMAL
+        at = 0.8;
+        num = 2;
     }
 
     // should we add a new pix?
-    if (Math.random() < 0.9) {
-        // find an open spot
-        var col = getOpenCol();
-        if (col >= 0) {
-            pix[col] = animationBoard.animStartRow;
-            pcolor[col] = getRandColor();
+    pixCols = []; // reset
+    for (var times=0; times<num; times++) {
+        if (at >= 1 || Math.random() < at) {
+            // find an open spot
+            var col = getOpenCol();
+            if (col >= 0) {
+                p = {
+                    x: col,
+                    y: animationBoard.animStartRow,
+                    c: getRandColor(),
+                    s: (weather_type == wtypes.RAINY) ? '!' : '*'
+                };
+                pix.push(p);
+                grid[p.y][p.x] = p; // add to grid for immediate drawing
+            }
         }
     }
 
-    // rain or snow?
-    var cChar = (weather_type == wtypes.RAINY) ? '!' : '*';
-    var bRain = (weather_type == wtypes.RAINY);
+    // console.log("tracking " + pix.length + " pix");
 
     // draw all relevant rows
     for (var y=animationBoard.animStartRow, yMax=animationBoard.animStartRow+animationBoard.animRowCount; y<yMax; y++) {
-        if (pix.indexOf(y) || pix.indexOf(y-1)) {
-            // we have SOMETHING to write here - pixel or space
-            var line = "", write = false;
-            for (x=0; x<animationBoard.cols; x++) {
-                if (pix[x] == y+1) {
+        if (grid[y].length == 0) {
+            // we have a blank row, short-circuit!
+            line = repeatString(" ", animationBoard.cols);
+        } else {
+            // we need to draw
+            line = "";
+            for (var x=0; x<animationBoard.cols; x++) {
+                if (grid[y][x] === undefined) {
                     line += " ";
-                    write = true;
-                } else if (pix[x] == y) {
-                    line += pcolor[x] + cChar;
-                    write = true;
-                } else if (y == animationBoard.rows - 1 && clear[x]) {
-                    line += " ";
-                    write = true;
-                    clear[x] = false;
                 } else {
-                    line += " ";
+                    // we have a pix!
+                    line += grid[y][x].c + grid[y][x].s;
                 }
             }
-            if (write) {
-                // console.log("Write line " + y + ": \"" + line + "\"");
-                options.path = "/peggy/write?board=" + animationBoard.id + "&x=0&y=" + y + "&text=" + encodeURIComponent(line);
-                http.get(options).on('error', simpleLogError);
-            }
         }
+
+        options.path = "/peggy/write?board=" + animationBoard.id + "&x=0&y=" + y + "&text=" + encodeURIComponent(line);
+        http.get(options).on('error', simpleLogError);
     }
+}
+
+function shiftWrapText(text, pad, shift, max) {
+    var len = text.length;
+    // ensure we have max # of chars, padding at end
+    if (len > max) {
+        text = substr(0, max);
+    } else if (len < max) {
+        text += repeatString(pad, max - len);
+    }
+    // shift and wrap
+    return text.substr(-shift) + text.substr(0, max-shift);
 }
 
 function repeatString(str, num) {
@@ -375,13 +508,18 @@ function writeCell(x, y, msg,boardId) {
 }
 
 function getOpenCol() {
-    for (var i=0; i<10; i++) { // try 10 times
-        var col = Math.floor(Math.random()*board.cols);
-        if (pix[col] == -1) {
-            return col;
-        }
+    // get array of open columns
+    var o = [];
+    for (var c=0; c<animationBoard.cols; c++) {
+        if (pixCols[c] === undefined) o.push(c);
     }
-    return -1;
+    // if nothing available, return -1
+    if (o.length == 0) return -1;
+    // randomly select one of these columns
+    var pos = Math.floor(Math.random() * o.length);
+    // console.log("getOpenCol selects index=" + pos + ", column=" + o[pos]);
+    pixCols[o[pos]] = 1;
+    return o[pos];
 }
 
 function getRandColor() {
@@ -407,6 +545,7 @@ function clearBoard(boardId){
 }
 
 function clearAnimation() {
+    fogDrawn = false;
     var line = repeatString(" ", animationBoard.cols);
     for (var y=animationBoard.animStartRow, yMax=animationBoard.animStartRow+animationBoard.animRowCount; y<yMax; y++) {
         writeCell(0, y, line,animationBoard.id);
@@ -420,4 +559,4 @@ getForecast();
 setInterval(updateTime, 10 * 1000); // 10 seconds
 setInterval(getWeather, 1000 * 60 * 1); // 5 minutes
 setInterval(getForecast, 1000 * 60 * 1); // 5 minutes
-setInterval(drawWeather, 1000); // 1 second
+setInterval(drawWeather, 1500); // increased from 1 second to share redraws a bit more
