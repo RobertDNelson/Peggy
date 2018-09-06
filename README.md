@@ -1,8 +1,8 @@
 Developer Console
 ---------------
-Running in dev mode is now the default behavior (run: node app.js). In dev mode, Peggy provides an HTML-based simulator for the LiteBrite. You can access this in your browser at /peggy/dev. To run the server in live mode (i.e. to connect to the LiteBrite directly), run: `node app.js --harmony live`
+Running in dev mode is now the default behavior (run: node app.js). In dev mode, Peggy provides an HTML-based simulator for the LiteBrite. You can access this in your browser at /peggy/dev. To run the server in live mode (i.e. to connect to the LiteBrite directly), run: `sudo forever start -c "node --harmony" app.js live`
 
-**Note:** If/when we update node on the Raspberry Pi (aka "portland") then we can get rid of the `--harmony` flag.
+**Note:** If/when we update node on the Raspberry Pi (aka "portland") then we can get rid of the `--harmony` flag and revert to `sudo forever start app.js live`
 
 API
 ---------------
