@@ -3,6 +3,7 @@ body { background-color: #000; color: #AAA; }
 	position: relative;
 	font-family: "Courier New", Courier, monospace;
 	font-size: 9px;
+	height: 421px;
 }
 pre { padding: 3px; margin: 0; }
 .board-big {
@@ -30,3 +31,9 @@ pre { padding: 3px; margin: 0; }
 .color-g .c127 { background-color: #0A0; }
 .color-o .c127 { background-color: #E70; }
 .color-r .c127 { background-color: #C00; }
+
+.form-row { margin-bottom: 3px; }
+textarea#art { width: 1070px; height: 201px; font-family: "Courier New", Courier, monospace; }
+.board-edit
+
+textarea, select, input, button { background-color: #bbb; }

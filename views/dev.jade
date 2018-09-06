@@ -13,3 +13,17 @@ html
       pre.board-3.board-big
       pre.board-4.board-small
       pre.board-5.board-small
+    h2 Board Printer
+    div.form-row
+      textarea#art
+    div.form-row
+      span Send to:&nbsp;
+      select#sendto
+        option(value=0) 0 - Top left
+        option(value=1) 1 - Top middle
+        option(value=2) 2 - Bottom left
+        option(value=3) 3 - Bottom middle
+    div.form-row
+      button#send Send
+      span &nbsp;
+      button#clear Clear
