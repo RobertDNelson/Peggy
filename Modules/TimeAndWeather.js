@@ -6,7 +6,7 @@ xml_digester._logger.level(xml_digester._logger.WARN_LEVEL); // stop showing INF
 var digester = xml_digester.XmlDigester({});
 require('date-format-lite');
 var options = {
-    host: '10.1.100.4',
+    host: 'localhost',
     port: 8080,
     agent: false
 };
@@ -228,7 +228,7 @@ function getWeather() {
             weather_severity = ws;
 
             // override
-            // weather_type = wtypes.RAINY;
+            // weather_type = wtypes.SUNNY;
             // weather_severity = wseverity.LIGHT;
 
             // update the board
@@ -403,7 +403,7 @@ function sun() {
     }
 
     sunBlink++;
-    if (sunBlink >= 5) sunBlink = 0;
+    if (sunBlink >= 3) sunBlink = 0;
 }
 
 function snowAndRain() {
@@ -559,4 +559,4 @@ getForecast();
 setInterval(updateTime, 10 * 1000); // 10 seconds
 setInterval(getWeather, 1000 * 60 * 1); // 5 minutes
 setInterval(getForecast, 1000 * 60 * 1); // 5 minutes
-setInterval(drawWeather, 1500); // increased from 1 second to share redraws a bit more
+setInterval(drawWeather, 4000); // increased from 1 second to share redraws a bit more
