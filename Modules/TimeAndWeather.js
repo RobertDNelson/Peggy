@@ -6,7 +6,7 @@ xml_digester._logger.level(xml_digester._logger.WARN_LEVEL); // stop showing INF
 var digester = xml_digester.XmlDigester({});
 require('date-format-lite');
 var options = {
-    host: 'localhost',
+    host: '10.1.100.4',
     port: 8080,
     agent: false
 };
@@ -153,7 +153,7 @@ function getForecast() {
 		 // get rid of HTML tags and extra spaces.
 		 temp = stripTags(temp,[],' ');
 		 temp = temp.replace('  ',' ');
-		 writeCell(0,row,'{r}' + period + ' {g}' + temp);
+		 writeCell(0,row,'{r}' + period + ' {g}' + temp + PADDING);
 		 row++;
 		}
 		
@@ -163,7 +163,7 @@ function getForecast() {
 		var humidityEnd = humidityBody.indexOf('</td>'); // next </td> should be the end of the humidity value.
 		humidityBody = humidityBody.substring(0,humidityEnd);
 		humidityBody = stripTags(humidityBody);
-		writeCell(0,3,'Humidity: ' + humidityBody);
+		writeCell(0,3,'Humidity: ' + humidityBody +  PADDING);
 		
     });
 }
