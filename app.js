@@ -24,9 +24,6 @@ board.connect();
 
 // reset the board
 board.turnOn();
-for (var i = 5; i >= 0; i--) {
-	board.clear(i);
-};
 
 // API
 api.all('/peggy/write', function (req, res) {

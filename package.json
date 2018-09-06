@@ -12,6 +12,7 @@
     "sleep": "1.1.x",
     "twitter": "1.2.5",
     "xml-digester": "*",
-    "jade": "*"
+    "jade": "*",
+	"striptags":"*"
   }
 }
