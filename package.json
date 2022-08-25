@@ -4,7 +4,7 @@
   "dependencies": {
     "bufferpack": "*",
     "date-format-lite": "0.5.x",
-    "dotenv": "^16.0.1",
+    "dotenv": "^1.1.0",
     "express": "3.x",
     "googleapis": "^1.1.1",
     "html-encoder-decoder": "*",
