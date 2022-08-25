@@ -4,12 +4,12 @@ var google = require('googleapis');
 var calendar = google.calendar('v3');
 
 var defaultParams = {
-  calendarId: 'explorecoco.com_mjo4fpfd0f53vt5nemrci5nuj4@group.calendar.google.com',
+  calendarId: process.env.CALENDAR_ID,
   orderBy: 'startTime',
   singleEvents: true,
   maxResults: 11,
   fields: 'items(summary,start)',
-  key: 'AIzaSyBd50j18XdFyya_oR8QrJFNOjE-JpdsRIg'
+  key: process.env.CALENDAR_KEY
 }
 
 function update() {
