@@ -4,15 +4,16 @@
   "dependencies": {
     "bufferpack": "*",
     "date-format-lite": "0.5.x",
+    "dotenv": "^1.1.0",
     "express": "3.x",
     "googleapis": "^1.1.1",
     "html-encoder-decoder": "*",
     "ical": "*",
+    "jade": "*",
     "request": "2.x",
     "sleep": "1.1.x",
+    "striptags": "*",
     "twitter": "1.2.5",
-    "xml-digester": "*",
-    "jade": "*",
-	"striptags":"*"
+    "xml-digester": "*"
   }
 }

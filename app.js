@@ -1,4 +1,6 @@
 var fs = require('fs');
+require('dotenv').config();
+
 var board;
 if (process.argv.indexOf('live') >= 0) {
 	console.log("Yep, this is LIVE.");
