@@ -108,7 +108,7 @@ api.all('/peggy/twitter', function(req, res) {
 		return;
 	}
 	modules['twitterBoard.js'].send({ term: req.query.q });
-	board.clear(2);
+	board.clear(3);
 	res.send(200);
 	res.end();
 });

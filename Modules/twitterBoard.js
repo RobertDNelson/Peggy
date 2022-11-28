@@ -23,7 +23,7 @@ process.on('message', function(search) {
 
 function update() {
 
-  var searchTerm = process.env['twitterSearchTerm'] || "@fueledcomn";
+  var searchTerm = process.env['twitterSearchTerm'] || "fueledcomn";
 
   twit.get('search/tweets', {q: searchTerm}, function(error, data, response) {
 
@@ -33,16 +33,21 @@ function update() {
       return;
     }
 
+    console.log(response);
+    console.log(data);
+    console.log(data.statuses);
+
+
     var curRowNum = 1;
     var maxRows = 12;
     var maxCharsPerRow = 80;
     var charsLeft = maxCharsPerRow;
-    var thisRow = "";
+    var thisRow = "                              ";
     var colors = ["{r}", "{o}", "{g}"];
     var curColor = 0;
     var rows = [];
 
-    rows[0] = "{g}*************** " + searchTerm + " Tweets ********************************************************";
+    rows[0] = "                              {g}****** " + searchTerm + " Tweets **************************";
 
     for (var i in data.statuses) {
 
@@ -75,7 +80,7 @@ function update() {
           } else {
             // Let's trim off the what we already printed off
             thisTweet = thisTweet.substring(amountOfTweet).trim();
-            thisRow = "";
+            thisRow = "                              ";
           }
         }
       }
