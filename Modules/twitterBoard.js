@@ -85,7 +85,7 @@ function update() {
       var options = {
         host: "localhost",
         port: 8080,
-        path: "/peggy/write?board=2&x=0&y=" + i + "&text=" + encodeURIComponent(rows[i]),
+        path: "/peggy/write?board=3&x=0&y=" + i + "&text=" + encodeURIComponent(rows[i]),
         agent: false
       };
 

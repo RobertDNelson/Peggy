@@ -53,14 +53,14 @@ function update() {
           dateString = eDate.format("MMM " + prettyDayString + "        ");
         }
 
-        rows[i + 1] = " ".repeat(32) + dateString + " - " + e.summary;
+        rows[i + 1] = dateString + " - " + e.summary;
       }
 
       for (var i = 0; i < 12; i++) {
         var options = {
           host: "localhost", // 10.105.4.251
           port: 8080,
-          path: "/peggy/write?board=3&x=0&y=" + i + "&text=" + encodeURIComponent(rows[i] + "                                                            "),
+          path: "/peggy/write?board=2&x=0&y=" + i + "&text=" + encodeURIComponent(rows[i] + "                                                            "),
           agent: false
         }
 
