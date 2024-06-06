@@ -10,8 +10,8 @@
     "html-encoder-decoder": "*",
     "ical": "*",
     "jade": "*",
+    "jsdom": "^24.1.0",
     "request": "2.x",
-    "sleep": "1.1.x",
     "striptags": "*",
     "twitter": "1.2.5",
     "xml-digester": "*"
