@@ -546,9 +546,9 @@ function clearAnimation() {
 clearBoard(4);
 clearBoard(5);
 updateTime();
-// getWeather();  BUGGY?!
+getWeather();
 getForecast();
 setInterval(updateTime, 10 * 1000); // 10 seconds
-// setInterval(getWeather, 1000 * 60 * 1); // 5 minutes
+setInterval(getWeather, 1000 * 60 * 1); // 5 minutes
 setInterval(getForecast, 1000 * 60 * 1); // 5 minutes
 setInterval(drawWeather, 4000); // increased from 1 second to share redraws a bit more
