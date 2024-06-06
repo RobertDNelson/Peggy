@@ -138,13 +138,15 @@ function getForecast() {
 		 if(!period) continue; // unexpected forecast markup
 		 // Only want full day forecasts, throw out the evening forecasts.
 		 if(period.indexOf('Night') != -1) continue;
+         // Get the short description
+         var shortDesc = forecastDoc.window.document.querySelector('p.short-desc')?.innerHTML;
          var temp = forecastDoc.window.document.querySelector('p.temp')?.innerHTML;
          // Have to make this pretty: Partly Sunny</p><p class="temp temp-high">High: 72 &deg;F</p>
    		 // Get rid of the 'high' and 'low' labels to save space.
 		 temp = temp.replace('High: ','');
 		 temp = temp.replace('Low: ','');
-		 // get rid of extra spaces.
-		 temp = temp.replace('  ',' ');
+		 temp = (shortDesc ?? '').concat(' ' + temp);
+         temp = stripTags(temp,[],' ');
 		 writeCell(0,row,'{r}' + period + ' {g}' + temp + PADDING);
 		 row++;
 		}
