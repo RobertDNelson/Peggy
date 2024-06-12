@@ -1,4 +1,5 @@
 var request = require('request');
+var domParser = require('jsdom');
 var stripTags = require('striptags');
 var http = require('http');
 var xml_digester = require('xml-digester');
@@ -118,7 +119,7 @@ function getForecast() {
 		*/
 		
 		// Short forecasts.  We are scraping from HTML so this is messy, but seems to work.  
-		
+
 		// Find the start of the <ul> that has all the forecast data in it.
 		var sevenDayForecastStart = body.indexOf('<ul id="seven-day-forecast-list" class="list-unstyled">') + 57;
 		var sevenDayForecastBody = body.substring(sevenDayForecastStart,body.length);
@@ -131,28 +132,21 @@ function getForecast() {
 		var row = 5;
 		// Go through each of our forecasts and 
 		for(var i=0;i<forecasts.length;i++){
-		 var forecast = forecasts[i];
+		 var forecastDoc = new domParser.JSDOM(forecasts[i]);
 		 // Find the period of the forecast - 'Today', 'Sunday' Tonight, etc.
-		 var periodStart = forecast.indexOf('<p class="period-name">') + 23;
-		 var periodEnd = forecast.indexOf('</p>');
-		 if(periodEnd== -1) continue; // This happens if there is garbage at the start of our parsing.
-		 var period = forecast.substring(periodStart,periodEnd);
-		 period = stripTags(period,[],' ').trim();
-		 
+		 var period = forecastDoc.window.document.querySelector('p.period-name')?.innerHTML;
+		 if(!period) continue; // unexpected forecast markup
 		 // Only want full day forecasts, throw out the evening forecasts.
 		 if(period.indexOf('Night') != -1) continue;
-		 var tempStart = forecast.indexOf('<p class="short-desc">') + 22;// Have to make this pretty: Partly Sunny</p><p class="temp temp-high">High: 72 &deg;F</p>
-		 // Cut off the html code for degrees F
-		 var tempEnd = forecast.indexOf('&deg;F</p>');
-		 var temp = forecast.substring(tempStart,tempEnd);
+		 // Get the short description
+		 var shortDesc = forecastDoc.window.document.querySelector('p.short-desc')?.innerHTML;
+		 var temp = forecastDoc.window.document.querySelector('p.temp')?.innerHTML;
+		 // Have to make this pretty: Partly Sunny</p><p class="temp temp-high">High: 72 &deg;F</p>
 		 // Get rid of the 'high' and 'low' labels to save space.
 		 temp = temp.replace('High: ','');
 		 temp = temp.replace('Low: ','');
-		 // Re-add the label we threw out a few lines ago.
-		 temp = temp.trim() + 'F';
-		 // get rid of HTML tags and extra spaces.
+		 temp = (shortDesc ?? '').concat(' ' + temp);
 		 temp = stripTags(temp,[],' ');
-		 temp = temp.replace('  ',' ');
 		 writeCell(0,row,'{r}' + period + ' {g}' + temp + PADDING);
 		 row++;
 		}
