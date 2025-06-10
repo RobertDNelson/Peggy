@@ -78,97 +78,98 @@ function updateTime() {
 	
     writeCell(1, 0, formattedDate + PADDING,animationBoard.id);
 }
-function getForecast() {
-	var opts = {
-        url: 'https://forecast.weather.gov/MapClick.php?lat=44.979&lon=-93.2649',
+// Store grid endpoint for forecasts
+var forecastGridpoint = null;
+
+// Get grid endpoint for the location
+function getGridpoint() {
+    var opts = {
+        url: 'https://api.weather.gov/points/44.979,-93.2649',
         headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.245'
+            'User-Agent': '(Peggy Weather Display, farts@farts.com)',
+            'Accept': 'application/json'
+        },
+        json: true
+    };
+    
+    request(opts, function (err, resp, body) {
+        if (err) {
+            console.log('Failed to get gridpoint: ' + err);
+            return;
         }
+        
+        try {
+            forecastGridpoint = body.properties.forecast;
+            // Now get the forecast
+            getForecast();
+        } catch (e) {
+            console.log('Failed to parse gridpoint data: ' + e);
+        }
+    });
+}
+
+function getForecast() {
+    if (!forecastGridpoint) {
+        getGridpoint();
+        return;
+    }
+    
+	var opts = {
+        url: forecastGridpoint,
+        headers: {
+            'User-Agent': '(Peggy Weather Display, farts@farts.com)',
+            'Accept': 'application/json'
+        },
+        json: true
     };
 	
 	request(opts, function (err, resp, body) {
 		
         if (err) {
-            console.log('Failed request to get weather: ' + err);
+            console.log('Failed request to get forecast: ' + err);
             return;
         }
-		/* This gets detailed forecasts.  Too much for the small board, but leaving to not lose the work.
-		var detailedForecastBodyStart = body.indexOf('id="detailed-forecast-body">') + 28;
-		var detailedForecastBodyEnd = body.indexOf('<!-- /Detailed Forecast -->');
-		var detailedForecastBody = body.substring(detailedForecastBodyStart,detailedForecastBodyEnd);
-		var nextForecastTimeStart = detailedForecastBody.indexOf('<div class="col-sm-2 forecast-label"><b>') + 40;
-		var nextForecastTimeEnd = detailedForecastBody.indexOf('</b>');
-		var nextForecastTime = detailedForecastBody.substring(nextForecastTimeStart,nextForecastTimeEnd);
-		var forecastStart = detailedForecastBody.indexOf('</b></div><div class="col-sm-10 forecast-text">') + 47;
-		var forecastEnd = detailedForecastBody.indexOf('</div></div><div class="row row-even row-forecast">');
-		var forecast = detailedForecastBody.substring(forecastStart,forecastEnd);
-		// Need to wrap the forecast.
-		var forecast2 = '';
-		var forecast3 = '';
-		if(forecast.length > board.cols){
-			forecast2 = forecast.substring(board.cols,forecast.length);
-		}
-		if(forecast2.length > board.cols){
-			forecast3 = forecast2.substring(board.cols,forecast2.length);
-		}
-		
-		// update the board
-		//writeCell(0, 9, nextForecastTime + ':' + PADDING);
-		//writeCell(0, 10, forecast + PADDING);
-		//writeCell(0, 11, forecast2 + PADDING);
-		*/
-		
-		// Short forecasts.  We are scraping from HTML so this is messy, but seems to work.  
-
-		// Find the start of the <ul> that has all the forecast data in it.
-		var sevenDayForecastStart = body.indexOf('<ul id="seven-day-forecast-list" class="list-unstyled">') + 57;
-		var sevenDayForecastBody = body.substring(sevenDayForecastStart,body.length);
-		var sevenDayForecastEnd = sevenDayForecastBody.indexOf('</ul>');
-		
-		sevenDayForecastBody = sevenDayForecastBody.substring(0,sevenDayForecastEnd);
-		// Each forecast blurb is in a 'tombstone-container' element pretty predictably.
-		var forecasts = sevenDayForecastBody.split('<div class="tombstone-container">');
-		// The row we want to start printing forecasts for.
-		var row = 5;
-		// Go through each of our forecasts and 
-		for(var i=0;i<forecasts.length;i++){
-		 var forecastDoc = new domParser.JSDOM(forecasts[i]);
-		 // Find the period of the forecast - 'Today', 'Sunday' Tonight, etc.
-		 var period = forecastDoc.window.document.querySelector('p.period-name')?.innerHTML;
-		 if(!period) continue; // unexpected forecast markup
-		 // Only want full day forecasts, throw out the evening forecasts.
-		 if(period.indexOf('Night') != -1) continue;
-		 // Get the short description
-		 var shortDesc = forecastDoc.window.document.querySelector('p.short-desc')?.innerHTML;
-		 var temp = forecastDoc.window.document.querySelector('p.temp')?.innerHTML;
-		 // Have to make this pretty: Partly Sunny</p><p class="temp temp-high">High: 72 &deg;F</p>
-		 // Get rid of the 'high' and 'low' labels to save space.
-		 temp = temp.replace('High: ','');
-		 temp = temp.replace('Low: ','');
-		 temp = (shortDesc ?? '').concat(' ' + temp);
-		 temp = stripTags(temp,[],' ');
-		 writeCell(0,row,'{r}' + period + ' {g}' + temp + PADDING);
-		 row++;
-		}
-		
-		// Scrape the humidity.
-		var humidityStart = body.indexOf('<b>Humidity</b></td>') + 20;
-		var humidityBody = body.substring(humidityStart,body.length).trim();
-		var humidityEnd = humidityBody.indexOf('</td>'); // next </td> should be the end of the humidity value.
-		humidityBody = humidityBody.substring(0,humidityEnd);
-		humidityBody = stripTags(humidityBody);
-		writeCell(0,3,'Humidity: ' + humidityBody +  PADDING);
-		
+        
+        try {
+            var periods = body.properties.periods || [];
+            
+            // The row we want to start printing forecasts for.
+            var row = 5;
+            var dayCount = 0;
+            
+            // Go through each forecast period
+            for (var i = 0; i < periods.length && dayCount < 7; i++) {
+                var period = periods[i];
+                
+                // Only want daytime forecasts for display
+                if (!period.isDaytime) continue;
+                
+                var name = period.name;
+                var temp = period.temperature + '°F';
+                var shortForecast = period.shortForecast;
+                
+                // Combine temperature and short forecast
+                var forecast = shortForecast + ' ' + temp;
+                
+                writeCell(0, row, '{r}' + name + ' {g}' + forecast + PADDING);
+                row++;
+                dayCount++;
+            }
+        } catch (e) {
+            console.log('Failed to parse forecast data: ' + e);
+        }
     });
 }
 
 function getWeather() {
 
     var opts = {
-        url: 'http://w1.weather.gov/xml/current_obs/KMSP.xml',
+        url: 'https://api.weather.gov/stations/KMSP/observations/latest',
         headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.245'
-        }
+            'User-Agent': '(Peggy Weather Display, contact@example.com)',
+            'Accept': 'application/json'
+        },
+        json: true
     };
 
     request(opts, function (err, resp, body) {
@@ -178,35 +179,49 @@ function getWeather() {
             return;
         }
 
-        // remove any XML directives
-        // body = body.replace(/\<\?xml.*?\?\>/gi, "");
-
-        digester.digest(body, function (err, result) {
-
-            if (err) {
-                console.log('Failed to parse XML: ' + err);
-                // console.log('Full XML:');
-                // console.log(body);
-                return;
+        try {
+            var properties = body.properties || {};
+            var weather = properties.textDescription || '';
+            var temperature = properties.temperature || {};
+            var wind = properties.windSpeed || {};
+            var windDirection = properties.windDirection || {};
+            var humidity = properties.relativeHumidity || {};
+            
+            // Format temperature (convert from Celsius to Fahrenheit)
+            var tempValue = temperature.value;
+            if (tempValue !== null && temperature.unitCode === 'wmoUnit:degC') {
+                tempValue = (tempValue * 9/5) + 32;
             }
-
-            result = result || {};
-            var observation = result.current_observation || {};
-            var weather = observation.weather || {};
-            var temperature = observation.temperature_string || '';
-			
-			// Remove celcius and tenths from the temp to save space and remove info people likely aren't using.
-			var tempDecimalStart = temperature.indexOf('.');
-			if(tempDecimalStart > 0){
-				temperature = temperature.substring(0,tempDecimalStart) + 'F';
-			}
-			
-            var wind = observation.wind_string || '';
-			// Remove the wind speed in knots; it doesn't fit on the board and no one cares.
-			var knotsStart = wind.indexOf(' (');
-			if(knotsStart > 0){
-				wind = wind.substring(0,knotsStart);
-			}
+            var temperatureString = tempValue ? Math.round(tempValue) + 'F' : 'N/A';
+            
+            // Format wind
+            var windString = '';
+            if (wind.value !== null) {
+                var windMph = wind.value;
+                if (wind.unitCode === 'wmoUnit:km_h-1') {
+                    windMph = wind.value * 0.621371; // Convert km/h to mph
+                }
+                windMph = Math.round(windMph);
+                
+                var direction = '';
+                if (windDirection.value !== null) {
+                    var deg = windDirection.value;
+                    var directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+                    direction = directions[Math.round(deg / 22.5) % 16];
+                }
+                
+                if (windMph === 0) {
+                    windString = 'Calm';
+                } else {
+                    windString = direction + ' at ' + windMph + ' MPH';
+                }
+            }
+            
+            // Update humidity if available
+            if (humidity.value !== null) {
+                var humidityString = Math.round(humidity.value) + '%';
+                writeCell(0, 3, 'Humidity: ' + humidityString + PADDING);
+            }
 			
             // update the weather type
             var wt = wtypes.SUNNY, ws = wseverity.NORMAL, wlc = weather.toLowerCase();
@@ -227,10 +242,12 @@ function getWeather() {
 
             // update the board
 			writeCell(0, 0,'{r}********* Weather *****************************');
-            writeCell(0, 1,  weather + ' ' + temperature +PADDING);
-            writeCell(0, 2, 'Wind: ' + wind + PADDING);
+            writeCell(0, 1,  weather + ' ' + temperatureString +PADDING);
+            writeCell(0, 2, 'Wind: ' + windString + PADDING);
 			writeCell(0, 4, PADDING);
-        });
+        } catch (e) {
+            console.log('Failed to parse weather data: ' + e);
+        }
     });
 }
 
@@ -549,8 +566,8 @@ clearBoard(4);
 clearBoard(5);
 updateTime();
 getWeather();
-getForecast();
+getGridpoint(); // This will call getForecast after getting the gridpoint
 setInterval(updateTime, 10 * 1000); // 10 seconds
-setInterval(getWeather, 1000 * 60 * 1); // 5 minutes
-setInterval(getForecast, 1000 * 60 * 1); // 5 minutes
+setInterval(getWeather, 1000 * 60 * 5); // 5 minutes
+setInterval(getForecast, 1000 * 60 * 5); // 5 minutes
 setInterval(drawWeather, 4000); // increased from 1 second to share redraws a bit more
